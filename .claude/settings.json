@@ -1,0 +1,10 @@
+{
+  "disableAllHooks": true,
+  "permissions": {
+    "allow": [
+      "Bash(npm run build*)",
+      "Bash(npm run typecheck*)",
+      "Bash(npm run lint*)"
+    ]
+  }
+}

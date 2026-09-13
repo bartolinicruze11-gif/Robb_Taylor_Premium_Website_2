@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter';
+    --font-jakarta: 'Plus Jakarta Sans';
+    --background: 213 96% 4%;
+    --foreground: 210 20% 96%;
+    --card: 214 60% 6%;
+    --card-foreground: 210 20% 96%;
+    --popover: 214 60% 6%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 213 90% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 30% 10%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 214 30% 9%;
+    --muted-foreground: 215 12% 50%;
+    --accent: 213 90% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 20% 11%;
+    --input: 214 20% 9%;
+    --ring: 213 90% 52%;
+    --radius: 0rem;
+
+    /* Premium design tokens */
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --navy-deep: #020c18;
+    --navy-mid: #040f1e;
+    --navy-surface: #06111f;
+    --steel: #7a95ae;
+    --steel-dim: #3d5668;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #020c18;
+    color: #e8edf2;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(34, 129, 245, 0.25);
+    color: white;
+  }
+
+  ::-webkit-scrollbar { width: 2px; }
+  ::-webkit-scrollbar-track { background: #020c18; }
+  ::-webkit-scrollbar-thumb { background: rgba(34, 129, 245, 0.25); border-radius: 1px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(34, 129, 245, 0.45); }
+
+  /* Smooth image rendering at all sizes */
+  img {
+    image-rendering: auto;
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .will-transform {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  a, button, [role="button"] { cursor: pointer; }
+
+  /* Section divider */
+  .section-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.055) 25%, rgba(255,255,255,0.055) 75%, transparent);
+  }
+
+  /* Sharp corner accents */
+  .corner-tl { @apply absolute top-0 left-0 w-6 h-6 border-t border-l border-blue-500/30; }
+  .corner-tr { @apply absolute top-0 right-0 w-6 h-6 border-t border-r border-blue-500/30; }
+  .corner-bl { @apply absolute bottom-0 left-0 w-6 h-6 border-b border-l border-blue-500/30; }
+  .corner-br { @apply absolute bottom-0 right-0 w-6 h-6 border-b border-r border-blue-500/30; }
+
+  /* Premium gradient text */
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #60a5fa 0%, #2281f5 50%, #1a7de0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-steel {
+    background: linear-gradient(135deg, #94b0c8 0%, #7a95ae 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Noise/grain texture overlay */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Premium card hover glow */
+  .card-glow {
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 0 0 1px rgba(34,129,245,0.15), 0 20px 60px -12px rgba(34,129,245,0.12);
+  }
+
+  /* Horizontal rule with fade */
+  .hr-fade {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  }
+
+  /* Animated underline */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: #2281f5;
+    transition: width 0.3s ease;
+  }
+  .link-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Kicker label */
+  .kicker {
+    @apply text-blue-500 text-[11px] font-bold tracking-[0.25em] uppercase;
+  }
+
+  /* Blue pill badge */
+  .badge-blue {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-bold tracking-[0.15em] uppercase;
+  }
+
+  /* Subtle background shimmer for cards */
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .shimmer-border {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
+    background-size: 200% auto;
+  }
+
+  /* Floating animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  .animate-float { animation: float 4s ease-in-out infinite; }
+
+  /* Pulse glow */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+  .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+  /* Number reveal */
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Premium focus ring */
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgba(34, 129, 245, 0.6);
+    outline-offset: 2px;
+  }
+}
+
+/* Aspect ratio containers — outside @layer so they beat Tailwind preflight */
+.ratio-16-9 { position: relative; width: 100%; overflow: hidden; padding-top: 56.25%; }
+.ratio-4-3  { position: relative; width: 100%; overflow: hidden; padding-top: 75%; }
+.ratio-3-2  { position: relative; width: 100%; overflow: hidden; padding-top: 66.666%; }
+
+.ratio-16-9 img,
+.ratio-4-3  img,
+.ratio-3-2  img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+}

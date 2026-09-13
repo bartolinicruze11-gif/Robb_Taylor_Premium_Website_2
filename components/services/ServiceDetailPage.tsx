@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { useState } from 'react';
 import { ArrowRight, ArrowLeft, CircleCheck as CheckCircle2, Phone, Mail, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,6 +43,7 @@ export default function ServiceDetailPage({ number, title, accent, description, 
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10 pb-16">
+          <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Services', href: '/services' }, { name: title }]} />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

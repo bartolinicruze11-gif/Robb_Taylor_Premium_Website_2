@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { ArrowRight, CircleCheck as CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { serviceImages } from '@/lib/project-images';
@@ -70,6 +71,7 @@ export default function ServicesPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[260px] bg-blue-500/5 blur-3xl rounded-full pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+          <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Services' }]} />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

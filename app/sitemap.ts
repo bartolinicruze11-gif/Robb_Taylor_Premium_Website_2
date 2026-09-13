@@ -1,22 +1,19 @@
 import type { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/site-url';
+
+// Last significant metadata update. Change this only when the associated page
+// content, links, or structured data changes, never on every build/request.
+const metadataUpdated = '2026-09-13';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://robbtaylor.co.nz';
-  const servicesDate = new Date('2026-06-01');
-  const homeDate = new Date('2026-06-09');
+  // Only existing, indexable pages belong here. /projects redirects to /,
+  // and /admin is private. Add service detail URLs when their routes are restored.
   return [
-    { url: base,                                       lastModified: homeDate,     changeFrequency: 'weekly',  priority: 1.0 },
-    { url: `${base}/services`,                         lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.95 },
-    { url: `${base}/services/civil-construction`,      lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-
-    { url: `${base}/services/earthworks`,              lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-    { url: `${base}/services/retaining-piling`,        lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-    { url: `${base}/services/trenching`,               lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-    { url: `${base}/services/pipe-installation`,       lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-    { url: `${base}/services/site-preparation`,        lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.90 },
-    { url: `${base}/contact`,                          lastModified: homeDate,     changeFrequency: 'monthly', priority: 0.85 },
-    { url: `${base}/about`,                            lastModified: servicesDate, changeFrequency: 'monthly', priority: 0.80 },
-    { url: `${base}/privacy`,                          lastModified: new Date('2026-05-01'), changeFrequency: 'yearly', priority: 0.20 },
-    { url: `${base}/terms`,                            lastModified: new Date('2026-05-01'), changeFrequency: 'yearly', priority: 0.20 },
+    { url: SITE_URL, lastModified: metadataUpdated, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/services`, lastModified: metadataUpdated, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${SITE_URL}/contact`, lastModified: metadataUpdated, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/about`, lastModified: metadataUpdated, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/privacy`, lastModified: metadataUpdated, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/terms`, lastModified: metadataUpdated, changeFrequency: 'yearly', priority: 0.2 },
   ];
 }

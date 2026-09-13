@@ -8,7 +8,7 @@ import ScrollProgress from '@/components/ScrollProgress';
 import CookieConsent from '@/components/CookieConsent';
 import { Analytics } from '@vercel/analytics/next';
 
-const BASE_URL = 'https://robbtaylor.co.nz';
+const BASE_URL = 'https://www.robbtaylor.co.nz';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

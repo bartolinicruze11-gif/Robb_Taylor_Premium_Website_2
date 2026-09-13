@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const BASE_URL = 'https://robbtaylor.co.nz';
+const BASE_URL = 'https://www.robbtaylor.co.nz';
 
 export const metadata: Metadata = {
   title: 'Civil Contracting Services Wellington | Robb & Taylor',
@@ -14,23 +14,6 @@ export const metadata: Metadata = {
   },
 };
 
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
-    { '@type': 'ListItem', position: 2, name: 'Services', item: `${BASE_URL}/services` },
-  ],
-};
-
 export default function ServicesLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

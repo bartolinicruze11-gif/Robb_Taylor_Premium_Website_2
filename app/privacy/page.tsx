@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Privacy Policy | Robb & Taylor Contracting',
   description: 'Privacy policy for Robb & Taylor Contracting Ltd. How we collect, use and protect your personal information.',
+  alternates: { canonical: 'https://www.robbtaylor.co.nz/privacy' },
   robots: { index: true, follow: true },
 };
 

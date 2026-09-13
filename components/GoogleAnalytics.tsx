@@ -1,16 +1,19 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const MEASUREMENT_ID = 'G-LNRQ7T148Z';
 
 export default function GoogleAnalytics() {
   const [accepted, setAccepted] = useState(false);
+  const acceptedRef = useRef(false);
+  const configuredRef = useRef(false);
 
   useEffect(() => {
     const update = (choice: string | null) => {
       const enabled = choice === 'accepted';
+      acceptedRef.current = enabled;
       // Stop collection if consent changes after the scripts have loaded.
       (window as unknown as Record<string, unknown>)[`ga-disable-${MEASUREMENT_ID}`] = !enabled;
       const tags = window as unknown as { gtag?: (...args: unknown[]) => void };
@@ -37,15 +40,16 @@ export default function GoogleAnalytics() {
   if (!accepted) return null;
 
   return (
-    <>
-      <Script id="google-analytics-init" strategy="afterInteractive">{`
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
-        gtag('js', new Date());
-        gtag('config', '${MEASUREMENT_ID}');
-      `}</Script>
-      <Script id="google-analytics" strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`} />
-    </>
+    <Script id="google-analytics" strategy="afterInteractive"
+      src={`https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`}
+      onReady={() => {
+        if (!acceptedRef.current || configuredRef.current) return;
+        configuredRef.current = true;
+        const tags = window as unknown as { gtag?: (...args: unknown[]) => void };
+        // Register the Analytics runtime before configuration, so GTM does not
+        // load a second copy while processing the shared dataLayer queue.
+        tags.gtag?.('js', new Date());
+        tags.gtag?.('config', MEASUREMENT_ID);
+      }} />
   );
 }

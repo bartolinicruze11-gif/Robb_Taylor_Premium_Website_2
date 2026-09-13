@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
 import { useRef, useEffect } from 'react';
 import { CircleCheck as CheckCircle2, ArrowRight, Users, Wrench, Shield, Award } from 'lucide-react';
@@ -106,7 +108,7 @@ export default function AboutPage() {
             >
               <div className="border border-white/[0.07]">
                 <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', overflow: 'hidden' }}>
-                  <img src={projectImages.aboutHero} alt="Robb &amp; Taylor Contracting - civil infrastructure works" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
+                  <Image fill priority sizes="(max-width: 768px) 100vw, 50vw" src={projectImages.aboutHero} alt="Robb &amp; Taylor Contracting - civil infrastructure works" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
                   <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-blue-500/40 z-10" />
                     <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-blue-500/40 z-10" />
@@ -142,7 +144,7 @@ export default function AboutPage() {
               <div className="relative w-52 h-52 lg:w-64 lg:h-64 flex-shrink-0">
                 <div className="absolute inset-0 rounded-full border border-blue-500/20" />
                 <div className="absolute -inset-2 rounded-full border border-blue-500/8" />
-                <img
+                <Image fill sizes="(max-width: 768px) 100vw, 50vw"
                   src="/images/Screenshot_2026-04-22_122210.png"
                   alt="Rene Robb — Founder & Director, Robb & Taylor Contracting"
                   className="w-full h-full object-cover rounded-full"
@@ -261,7 +263,7 @@ export default function AboutPage() {
               transition={{ duration: 0.6, delay: i * 0.1 }}
             >
               <div style={{ position: 'relative', width: '100%', paddingTop: '66.67%', overflow: 'hidden' }}>
-                <img src={img.src} alt={img.alt} className="group-hover:scale-[1.04] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(0.96) saturate(0.95)' }} />
+                <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={img.src} alt={img.alt} className="group-hover:scale-[1.04] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(0.96) saturate(0.95)' }} />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute inset-0 bg-gradient-to-t from-[#020c18]/60 via-transparent to-transparent" />
                 </div>

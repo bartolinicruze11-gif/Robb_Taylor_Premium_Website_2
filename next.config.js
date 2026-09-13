@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true,
+    formats: ['image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePageVisible } from '@/hooks/use-page-visible';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Phone, ChevronDown } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useReducedMotion } from 'framer-motion';
 import gsap from 'gsap';
 
 type MediaItem =
@@ -11,9 +13,8 @@ type MediaItem =
   | { type: 'image'; src: string; position: string; duration: number };
 
 const heroMedia: MediaItem[] = [
-  { type: 'video', src: '/videos/Create_a_pristine_cinematic_dr_1440p_strong_enhanced.mp4', duration: 14000 },
   { type: 'image', src: '/images/Screenshot_2026-05-26_095401.png',             position: 'center 50%', duration: 5000 },
-  { type: 'video', src: '/videos/Use_these_two_reference_images.mp4',            duration: 14000 },
+  { type: 'video', src: '/videos/hero-optimized.mp4', duration: 14000 },
   { type: 'image', src: '/images/WhatsApp_Image_2026-05-21_at_6.50.00_AM.jpeg', position: 'center 45%', duration: 5000 },
   { type: 'image', src: '/images/Screenshot_2026-05-27_091422.png',             position: 'center 45%', duration: 5000 },
   { type: 'image', src: '/images/Screenshot_2026-05-27_091929.png',             position: 'center 50%', duration: 5000 },
@@ -23,15 +24,13 @@ export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const headRef    = useRef<HTMLDivElement>(null);
 
-  const [index,     setIndex]     = useState(0);
-  const [prevIndex, setPrevIndex] = useState<number | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const advance = (skipIndex?: number) => {
-    const from = skipIndex ?? index;
-    setPrevIndex(from);
-    setIndex(i => (i === from ? (from + 1) % heroMedia.length : i));
-  };
+  const [index, setIndex] = useState(0);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const inView = useInView(sectionRef);
+  const visible = usePageVisible();
+  const reducedMotion = useReducedMotion();
+  const running = inView && visible && !reducedMotion;
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
   const bgScale   = useTransform(scrollYProgress, [0, 1], [1.0, 1.10]);
@@ -39,23 +38,29 @@ export default function HeroSection() {
   const contentY  = useTransform(scrollYProgress, [0, 1], [0, 90]);
 
   useEffect(() => {
-    if (!headRef.current) return;
-    const lines = headRef.current.querySelectorAll('.hl');
-    gsap.fromTo(lines,
-      { yPercent: 115, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 1.2, ease: 'power4.out', stagger: 0.13, delay: 0.25 }
-    );
-  }, []);
+    if (!headRef.current || reducedMotion) return;
+    const context = gsap.context(() => {
+      gsap.fromTo('.hl', { yPercent: 115, opacity: 0 },
+        { yPercent: 0, opacity: 1, duration: 0.8, ease: 'power4.out', stagger: 0.1 });
+    }, headRef);
+    return () => context.revert();
+  }, [reducedMotion]);
 
-  // Advance through media sequence; duration depends on item type
   useEffect(() => {
-    const current = heroMedia[index];
-    timerRef.current = setTimeout(() => {
-      setPrevIndex(index);
-      setIndex(i => (i + 1) % heroMedia.length);
-    }, current.duration);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [index]);
+    if (!running) return;
+    const timer = setTimeout(() => setIndex(i => {
+      const next = (i + 1) % heroMedia.length;
+      return videoFailed && heroMedia[next].type === 'video' ? (next + 1) % heroMedia.length : next;
+    }), heroMedia[index].duration);
+    return () => clearTimeout(timer);
+  }, [index, running, videoFailed]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (running) void video.play().catch(() => { /* Keep the background photo if autoplay is blocked. */ });
+    else video.pause();
+  }, [index, running]);
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex flex-col overflow-hidden bg-[#020c18]">
@@ -63,72 +68,26 @@ export default function HeroSection() {
       {/* ── Background: unified video + image sequence ── */}
       <motion.div
         className="absolute inset-0 z-0"
-        style={{ scale: bgScale, opacity: bgOpacity }}
+        style={{ scale: reducedMotion ? 1 : bgScale, opacity: reducedMotion ? 1 : bgOpacity }}
       >
-        {/* Previous item fading out */}
-        {prevIndex !== null && (() => {
-          const prev = heroMedia[prevIndex];
-          return prev.type === 'video' ? (
-            <motion.video
-              key={`prev-${prevIndex}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              src={prev.src}
-              autoPlay muted playsInline
-              style={{ filter: 'brightness(0.52) saturate(0.78)' }}
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 2.2, ease: 'easeInOut' }}
-            />
-          ) : (
-            <motion.img
-              key={`prev-${prevIndex}`}
-              src={prev.src}
-              alt="" aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: 'brightness(0.58) saturate(0.85)', objectPosition: prev.position }}
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 1.8, ease: 'easeInOut' }}
-            />
-          );
-        })()}
-
-        {/* Current item fading in */}
+        <Image src="/images/Screenshot_2026-05-26_095401.png" alt="" fill priority
+          sizes="100vw" className="object-cover" style={{ filter: 'brightness(0.58) saturate(0.85)' }} />
         {(() => {
-          const curr = heroMedia[index];
-          return curr.type === 'video' ? (
-            <motion.video
-              key={`curr-${index}`}
+          const current = heroMedia[reducedMotion ? 0 : index];
+          return current.type === 'video' ? (
+            <motion.video key={index} ref={videoRef} src={current.src}
+              muted playsInline preload="metadata"
               className="absolute inset-0 w-full h-full object-cover"
-              src={curr.src}
-              autoPlay muted playsInline
               style={{ filter: 'brightness(0.52) saturate(0.78)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 2.2, ease: 'easeInOut' }}
-              onEnded={() => {
-                if (timerRef.current) clearTimeout(timerRef.current);
-                setPrevIndex(index);
-                setIndex(i => (i + 1) % heroMedia.length);
-              }}
-              onError={() => {
-                if (timerRef.current) clearTimeout(timerRef.current);
-                setPrevIndex(index);
-                setIndex(i => (i + 1) % heroMedia.length);
-              }}
-            />
-          ) : (
-            <motion.img
-              key={`curr-${index}`}
-              src={curr.src}
-              alt="" aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: 'brightness(0.58) saturate(0.85)', objectPosition: curr.position }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.8, ease: 'easeInOut' }}
-            />
-          );
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
+              onError={() => { setVideoFailed(true); setIndex(0); }} />
+          ) : index !== 0 && !reducedMotion ? (
+            <motion.div key={index} className="absolute inset-0"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+              <Image src={current.src} alt="" fill sizes="100vw"
+                className="object-cover" style={{ objectPosition: current.position, filter: 'brightness(0.58) saturate(0.85)' }} />
+            </motion.div>
+          ) : null;
         })()}
       </motion.div>
 
@@ -156,7 +115,7 @@ export default function HeroSection() {
       {/* ── Main content ── */}
       <motion.div
         className="relative z-20 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full px-6 lg:px-10 pt-36 pb-28 lg:pt-52 lg:pb-36"
-        style={{ y: contentY }}
+        style={{ y: reducedMotion ? 0 : contentY }}
       >
         {/* Kicker */}
         <motion.div
@@ -257,7 +216,7 @@ export default function HeroSection() {
       >
         <span className="text-[#2a3d4e] text-[9px] font-bold tracking-[0.3em] uppercase rotate-90 origin-center mb-3">Scroll</span>
         <motion.div
-          animate={{ y: [0, 7, 0] }}
+          animate={{ y: running ? [0, 7, 0] : 0 }}
           transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
         >
           <ChevronDown className="w-4 h-4 text-[#2a3d4e]" />

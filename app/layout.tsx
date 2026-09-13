@@ -5,10 +5,11 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScrollProvider from '@/components/SmoothScrollProvider';
 import ScrollProgress from '@/components/ScrollProgress';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import CookieConsent from '@/components/CookieConsent';
 import { Analytics } from '@vercel/analytics/next';
 
-const BASE_URL = 'https://robbtaylor.co.nz';
+const BASE_URL = 'https://www.robbtaylor.co.nz';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -230,6 +231,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <CookieConsent />
         </SmoothScrollProvider>
+        <GoogleAnalytics />
         <Analytics />
       </body>
     </html>

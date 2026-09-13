@@ -28,12 +28,14 @@ export default function CookieConsent() {
 
   const accept = () => {
     try { localStorage.setItem(STORAGE_KEY, 'accepted'); } catch { /* noop */ }
+    window.dispatchEvent(new CustomEvent('rt:cookie-consent', { detail: 'accepted' }));
     setConsent('accepted');
     setVisible(false);
   };
 
   const decline = () => {
     try { localStorage.setItem(STORAGE_KEY, 'declined'); } catch { /* noop */ }
+    window.dispatchEvent(new CustomEvent('rt:cookie-consent', { detail: 'declined' }));
     setConsent('declined');
     setVisible(false);
   };

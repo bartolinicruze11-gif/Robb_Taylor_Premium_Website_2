@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -108,7 +110,7 @@ export default function ServicesPreview() {
             transition={{ duration: 0.65, delay: i * 0.07 }}
           >
             <div style={{ position: 'relative', width: '100%', paddingTop: '66.67%', overflow: 'hidden' }}>
-              <img
+              <Image fill sizes="(max-width: 768px) 100vw, 50vw"
                 src={s.image}
                 alt={s.imageAlt}
                 className="group-hover:scale-[1.04] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"

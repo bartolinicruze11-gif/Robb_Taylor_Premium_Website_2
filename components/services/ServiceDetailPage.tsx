@@ -1,12 +1,17 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import { services } from '@/lib/services';
 import { useState } from 'react';
 import { ArrowRight, ArrowLeft, CircleCheck as CheckCircle2, Phone, Mail, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProjectSlideshow, { type SlideshowPhoto } from '@/components/home/ProjectSlideshow';
 
 interface Props {
+  slug?: string;
   number: string;
   title: string;
   accent: string;
@@ -18,16 +23,11 @@ interface Props {
   slideshowPhotos?: SlideshowPhoto[];
 }
 
-const allServices = [
-  { label: 'Civil Construction',   href: '/services/civil-construction' },
-  { label: 'Earthworks & Pavements', href: '/services/earthworks' },
-  { label: 'Retaining & Piling Works', href: '/services/retaining-piling' },
-  { label: 'Trenching',            href: '/services/trenching' },
-  { label: 'Pipe Installation',    href: '/services/pipe-installation' },
-  { label: 'Site Preparation',     href: '/services/site-preparation' },
-];
+const allServices = services.map(service => ({
+  slug: service.slug, label: service.title, href: `/services/${service.slug}`,
+}));
 
-export default function ServiceDetailPage({ number, title, accent, description, longDescription, image, capabilities, slideshowPhotos }: Props) {
+export default function ServiceDetailPage({ slug, number, title, accent, description, longDescription, image, capabilities, slideshowPhotos }: Props) {
   const [lightbox, setLightbox] = useState(false);
 
   return (
@@ -42,6 +42,7 @@ export default function ServiceDetailPage({ number, title, accent, description, 
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10 pb-16">
+          <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Services', href: '/services' }, { name: title }]} />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,7 +85,7 @@ export default function ServiceDetailPage({ number, title, accent, description, 
           aria-label={`View full image of ${title}`}
         >
           <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', overflow: 'hidden', background: '#040f1e' }}>
-            <img src={image} alt={`Robb & Taylor — ${title} Wellington`} className="group-hover:scale-[1.02] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', filter: 'brightness(1.0) saturate(0.96)' }} />
+            <Image fill priority sizes="(max-width: 768px) 100vw, 50vw" src={image} alt={`Robb & Taylor — ${title} Wellington`} className="group-hover:scale-[1.02] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', filter: 'brightness(1.0) saturate(0.96)' }} />
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute inset-0 bg-gradient-to-t from-[#020d1a] via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${accent}60, transparent 60%)` }} />
@@ -167,7 +168,7 @@ export default function ServiceDetailPage({ number, title, accent, description, 
                 <h3 className="text-white font-bold text-sm mb-4">Other Services</h3>
                 <ul className="flex flex-col gap-2">
                   {allServices
-                    .filter(s => !s.href.includes(title.toLowerCase().replace(/ /g, '-')))
+                    .filter(s => s.slug !== slug)
                     .map(s => (
                       <li key={s.href}>
                         <Link href={s.href} className="flex items-center gap-1.5 text-[#5a7a8e] hover:text-white text-sm transition-colors group">

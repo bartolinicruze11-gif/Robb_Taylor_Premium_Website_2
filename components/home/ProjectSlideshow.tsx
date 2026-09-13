@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import { usePageVisible } from '@/hooks/use-page-visible';
+import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ZoomIn, Pause, Play } from 'lucide-react';
 import { allProjectPhotos } from '@/lib/project-images';
 
@@ -42,6 +44,10 @@ export default function ProjectSlideshow({
   kicker = 'Site Gallery',
   compact = false,
 }: Props) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef);
+  const pageVisible = usePageVisible();
+  const reducedMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [lightbox, setLightbox] = useState(false);
@@ -50,45 +56,39 @@ export default function ProjectSlideshow({
   const videoRef  = useRef<HTMLVideoElement | null>(null);
   const total = photos.length;
 
-  const current = photos[active];
-  const isVideo = current.type === 'video';
-  const accent = accentColors[current.category] ?? '#2281f5';
+  const current = photos[active] ?? photos[0];
+  const running = inView && pageVisible && !paused && !lightbox && !reducedMotion && total > 1;
+  const isVideo = current?.type === 'video';
+  const accent = accentColors[current?.category] ?? '#2281f5';
 
   const go = useCallback((next: number, dir: number) => {
     setDirection(dir);
-    setActive((next + total) % total);
+    if (total) setActive((next + total) % total);
   }, [total]);
 
   const prev = useCallback(() => go(active - 1, -1), [active, go]);
   const next = useCallback(() => go(active + 1, 1), [active, go]);
 
-  // Callback ref: stores node and triggers play on mount
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
     videoRef.current = node;
-    if (node) {
-      node.play().catch(() => go(active + 1, 1));
+    if (node && inView && pageVisible && !paused && !lightbox && !reducedMotion) {
+      void node.play().catch(() => {});
     }
-  }, [active, go]);
+  }, [inView, pageVisible, paused, lightbox, reducedMotion]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && (!inView || !pageVisible || paused || lightbox || reducedMotion)) video.pause();
+  }, [inView, pageVisible, paused, lightbox, reducedMotion]);
 
   useEffect(() => { setActive(0); }, [photos]);
 
   // Auto-advance images only; video slides stay until manually navigated
   useEffect(() => {
-    if (paused || isVideo) return;
+    if (!running || isVideo) return;
     timerRef.current = setTimeout(() => go(active + 1, 1), autoplayMs);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [active, paused, autoplayMs, go, isVideo]);
-
-  // Watchdog: skip video slide if no frames appear within 4 s (codec / buffering failure)
-  useEffect(() => {
-    if (!isVideo) return;
-    const watchdog = setTimeout(() => {
-      if (videoRef.current && videoRef.current.currentTime === 0) {
-        go(active + 1, 1);
-      }
-    }, 4000);
-    return () => clearTimeout(watchdog);
-  }, [active, isVideo, go]);
+  }, [active, running, autoplayMs, go, isVideo]);
 
   const variants = {
     enter: (d: number) => ({ opacity: 0, x: d * 30 }),
@@ -98,8 +98,10 @@ export default function ProjectSlideshow({
 
   const transitionDuration = Math.min(autoplayMs * 0.22, 480) / 1000;
 
+  if (!current) return null;
+
   return (
-    <section className="bg-[#020c18]">
+    <section ref={sectionRef} className="bg-[#020c18]">
       <div className="section-line" />
 
       <div className={`max-w-7xl mx-auto px-6 lg:px-10 ${compact ? 'py-14 lg:py-20' : 'py-20 lg:py-28'}`}>
@@ -162,23 +164,22 @@ export default function ProjectSlideshow({
                     ref={setVideoRef}
                     src={current.src}
                     poster="/images/Screenshot_2026-05-26_095401.png"
-                    autoPlay
                     muted
                     loop
                     playsInline
-                    preload="auto"
+                    preload="metadata"
                     className="block w-full h-auto"
                     style={{ maxHeight: compact ? '55vh' : '70vh', objectFit: 'contain', filter: 'brightness(0.88) saturate(0.92) contrast(1.04)' }}
                     onError={() => go(active + 1, 1)}
                   />
                 ) : (
-                  <img
+                  <Image width={1600} height={1000} sizes="(max-width: 768px) 100vw, 1200px"
                     src={current.src}
                     alt={current.caption}
                     className="block w-full h-auto"
                     style={{ maxHeight: compact ? '55vh' : '70vh', objectFit: 'contain', filter: 'brightness(0.88) saturate(0.92) contrast(1.04)' }}
                     loading="lazy"
-                    onError={() => go(active + 1, 1)}
+                    onError={() => setPaused(true)}
                   />
                 )}
                 <div className="absolute inset-0 pointer-events-none"
@@ -212,13 +213,13 @@ export default function ProjectSlideshow({
 
             {/* Progress bar — animates for images; static for video slides */}
             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.05] z-20">
-              {!paused && !isVideo && (
+              {running && !isVideo && (
                 <motion.div
                   key={`bar-${active}`}
                   className="h-full"
-                  style={{ background: accent }}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
+                  style={{ background: accent, transformOrigin: 'left' }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
                   transition={{ duration: autoplayMs / 1000, ease: 'linear' }}
                 />
               )}
@@ -282,7 +283,7 @@ export default function ProjectSlideshow({
                     </div>
                   </>
                 ) : (
-                  <img
+                  <Image width={60} height={40} sizes="60px"
                     src={photo.src}
                     alt={photo.caption}
                     className="w-full h-full object-cover"
@@ -338,7 +339,7 @@ export default function ProjectSlideshow({
                   className="w-full h-auto max-h-[85vh] object-contain"
                 />
               ) : (
-                <img
+                <Image width={1600} height={1000} sizes="90vw"
                   src={current.src}
                   alt={current.caption}
                   className="w-full h-auto max-h-[85vh] object-contain"

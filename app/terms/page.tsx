@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service | Robb & Taylor Contracting',
   description: 'Terms of service for Robb & Taylor Contracting Ltd. Your use of our website and services.',
+  alternates: { canonical: 'https://www.robbtaylor.co.nz/terms' },
   robots: { index: true, follow: true },
 };
 

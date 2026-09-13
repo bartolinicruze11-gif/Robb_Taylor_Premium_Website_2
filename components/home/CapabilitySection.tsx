@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { CircleCheck as CheckCircle2, ArrowRight } from 'lucide-react';
@@ -105,7 +107,7 @@ export default function CapabilitySection() {
               transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
             >
               <div style={{ position: 'relative', width: '100%', paddingTop: '66.67%', overflow: 'hidden' }}>
-                <img src={projectImages.retainingWallComplete} alt="Robb &amp; Taylor — retaining wall and piling works Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
+                <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={projectImages.retainingWallComplete} alt="Robb &amp; Taylor — retaining wall and piling works Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="corner-tl z-10" /><div className="corner-tr z-10" /><div className="corner-bl z-10" /><div className="corner-br z-10" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#020c18]/50 via-transparent to-transparent" />
@@ -125,7 +127,7 @@ export default function CapabilitySection() {
               transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.12 }}
             >
               <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', overflow: 'hidden' }}>
-                <img src={projectImages.pipes} alt="Robb &amp; Taylor — large-diameter concrete pipe installation Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
+                <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={projectImages.pipes} alt="Robb &amp; Taylor — large-diameter concrete pipe installation Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute inset-0 bg-gradient-to-t from-[#020c18]/50 via-transparent to-transparent" />
                   <div className="absolute bottom-3.5 left-4 flex items-center gap-2">

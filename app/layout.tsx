@@ -5,6 +5,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScrollProvider from '@/components/SmoothScrollProvider';
 import ScrollProgress from '@/components/ScrollProgress';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import CookieConsent from '@/components/CookieConsent';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -230,6 +231,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <CookieConsent />
         </SmoothScrollProvider>
+        <GoogleAnalytics />
         <Analytics />
       </body>
     </html>

@@ -22,22 +22,22 @@ const R = {
 
   // Retaining & piling (confirmed real uploads)
   retWall1: '/images/Screenshot_2026-06-18_073341.png',
-  retWall2: '/images/retaining-piling/ChatGPT_Image_Sep_4,_2026,_09_36_32_AM.png',
+  retWall2: '/images/Screenshot_2026-06-18_073341.png',
 
   // Trenching (new uploads)
-  trench_t1: '/images/trenching/WhatsApp_Image_2026-05-21_at_6.49.59_AM.jpeg',
-  trench_t2: '/images/trenching/WhatsApp_Image_2026-05-21_at_6.49.59_AM_(1).jpeg',
+  trench_t1: '/images/097886d0-5afa-4463-8890-4489f97ef67a.JPG',
+  trench_t2: '/images/WhatsApp_Image_2026-05-21_at_6.49.59_AM_(10).jpeg',
 
   // Civil construction
-  civilConst1: '/images/civil-construction/image.png',
+  civilConst1: '/images/Screenshot_2026-05-26_104638.png',
   civilConst2: '/images/Screenshot_2026-06-18_073355.png',
   civilConst3: '/images/Screenshot_2026-05-26_104638.png',
   civilConst4: "/images/Screenshot_2026-05-27_091929 copy.png",
-  civilConst5: "/images/civil-construction/Screenshot_2026-06-09_062126 copy copy.png",
-  civilConst7: "/images/civil-construction/Screenshot_2026-06-11_093111 copy.png",
+  civilConst5: "/images/Screenshot_2026-05-27_091929.png",
+  civilConst7: "/images/Screenshot_2026-05-27_091422.png",
 
   // Earthworks
-  earthworksSunset: '/images/earthworks/WhatsApp_Image_2026-09-04_at_7.14.32_AM.jpeg',
+  earthworksExcavation: '/images/WhatsApp_Image_2026-05-21_at_6.50.00_AM.jpeg',
 
   // Other real images
   digger:  '/images/Remove_Blue_Sign_Writing_from_Digger_Photo.png',
@@ -47,7 +47,7 @@ export const projectImages = {
   trench:              R.trench,
   pipes:               R.pipes,
   tanks:               R.tanks,
-  aboutHero:           '/images/about/Screenshot_2026-06-11_093111.png',
+  aboutHero:           '/images/Screenshot_2026-05-27_091422.png',
   hdpePipework:        R.pipes,
   drainageChannel:     R.wa04_3,
   indoorExcavation:    R.wa21_ex,
@@ -71,11 +71,11 @@ export const projectImages = {
   siteOverview:        R.ss0526a,
   excavatorSite:       R.ss0526a,
   drainageChannelRt:   R.wa04_3,
-  civilInfra:          R.ss0507b,
+  civilInfra:          R.ss0527a,
   concretePump:        R.wa21_7,
   siteWorks2:          R.wa04_5,
   siteWorks3:          R.ss0526c,
-  siteWorks4:          R.ss0507b,
+  siteWorks4:          R.ss0526a,
   waterInfra4:         R.tanks,
   waterInfra5:         R.pipes,
   waterInfra6:         R.trench,
@@ -97,21 +97,21 @@ export const allProjectPhotos: ProjectPhoto[] = [
   { src: R.ss0526a,     caption: 'Robb & Taylor — Civil Excavation Works', category: 'Civil Construction' },
   { src: R.wa21_ex,     caption: 'Commercial Indoor Excavation',           category: 'Civil Construction' },
   { src: R.wa21_7,      caption: 'Reinforced Concrete Works',              category: 'Civil Construction' },
-  { src: R.civilConst5, caption: 'Precast Panel Crane Lift',               category: 'Civil Construction' },
-  { src: R.civilConst7, caption: 'Concrete Pump Pour on Formwork',         category: 'Civil Construction' },
+  { src: R.civilConst5, caption: 'Concrete Pipe Infrastructure',               category: 'Civil Construction' },
+  { src: R.civilConst7, caption: 'Indoor Concrete Preparation',         category: 'Civil Construction' },
   { src: R.retWall1,    caption: 'Concrete Retaining Wall Construction',   category: 'Retaining & Piling' },
-  { src: R.earthworksSunset, caption: 'Excavator at Sunset',                  category: 'Earthworks' },
+  { src: R.earthworksExcavation, caption: 'Commercial Excavation Works',                  category: 'Earthworks' },
 ];
 
 export const servicePhotos: Record<string, ProjectPhoto[]> = {
   'civil-construction': [
     { src: R.ss0526a,     caption: 'Civil Excavation Works',            category: 'Civil Construction' },
     { src: R.civilConst1, caption: 'Civil Construction Works',          category: 'Civil Construction' },
-    { src: R.civilConst5, caption: 'Precast Panel Crane Lift',          category: 'Civil Construction' },
-    { src: R.civilConst7, caption: 'Concrete Pump Pour on Formwork',    category: 'Civil Construction' },
+    { src: R.civilConst5, caption: 'Concrete Pipe Infrastructure',          category: 'Civil Construction' },
+    { src: R.civilConst7, caption: 'Indoor Concrete Preparation',    category: 'Civil Construction' },
   ],
   'earthworks': [
-    { src: R.earthworksSunset, caption: 'Excavator at Sunset',          category: 'Earthworks' },
+    { src: R.earthworksExcavation, caption: 'Commercial Excavation Works',          category: 'Earthworks' },
   ],
   'trenching': [
     { src: R.wa21_7,    caption: 'Concrete Trenching Works',          category: 'Trenching' },
@@ -125,7 +125,6 @@ export const servicePhotos: Record<string, ProjectPhoto[]> = {
   ],
   'retaining-piling': [
     { src: R.retWall1,    caption: 'Concrete Retaining Wall Construction', category: 'Retaining & Piling' },
-    { src: R.retWall2,    caption: 'Retaining Wall Works',                 category: 'Retaining & Piling' },
   ],
   'site-preparation': [
     { src: R.ss0527a,  caption: 'Site Overview & Preparation',       category: 'Site Preparation' },

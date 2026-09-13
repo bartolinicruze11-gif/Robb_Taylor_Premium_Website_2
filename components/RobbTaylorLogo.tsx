@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface Props {
   className?: string;
   variant?: 'nav' | 'footer' | 'loading';
@@ -8,7 +10,11 @@ interface Props {
 export default function RobbTaylorLogo({ className = '', variant = 'nav' }: Props) {
   if (variant === 'nav') {
     return (
-      <img
+      <Image
+        width={1521}
+        height={1032}
+        sizes="384px"
+        priority
         src="/images/Screenshot_2026-05-07_152715.png"
         alt="Robb & Taylor Contracting"
         className={className}
@@ -29,10 +35,11 @@ export default function RobbTaylorLogo({ className = '', variant = 'nav' }: Prop
   const h = heights[variant] ?? 90;
 
   return (
-    <img
+    <Image
       src="/images/Screenshot_2026-05-07_152715.png"
       alt="Robb & Taylor Contracting"
-      width={Math.round(h * (1295 / 701))}
+      sizes="192px"
+      width={Math.round(h * (1521 / 1032))}
       height={h}
       className={className}
       style={{

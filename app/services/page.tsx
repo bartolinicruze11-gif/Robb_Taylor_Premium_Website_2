@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { ArrowRight, CircleCheck as CheckCircle2 } from 'lucide-react';
@@ -68,7 +70,7 @@ export default function ServicesPage() {
                   {/* Image panel */}
                   <div className={`group ${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
                     <div style={{ position: 'relative', width: '100%', paddingTop: '75%', overflow: 'hidden' }}>
-                      <img src={img} alt={`${service.title} — Robb & Taylor Wellington`} className="group-hover:scale-[1.04] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(0.95) saturate(0.95)' }} />
+                      <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={img} alt={`${service.title} — Robb & Taylor Wellington`} className="group-hover:scale-[1.04] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%', filter: 'brightness(0.95) saturate(0.95)' }} />
                       <div className="absolute inset-0 pointer-events-none">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 h-[3px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(90deg, ${service.accent}, transparent)` }} />

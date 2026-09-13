@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import Link from 'next/link';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { services } from '@/lib/services';
@@ -83,7 +85,7 @@ export default function ServiceDetailPage({ slug, number, title, accent, descrip
           aria-label={`View full image of ${title}`}
         >
           <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', overflow: 'hidden', background: '#040f1e' }}>
-            <img src={image} alt={`Robb & Taylor — ${title} Wellington`} className="group-hover:scale-[1.02] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', filter: 'brightness(1.0) saturate(0.96)' }} />
+            <Image fill priority sizes="(max-width: 768px) 100vw, 50vw" src={image} alt={`Robb & Taylor — ${title} Wellington`} className="group-hover:scale-[1.02] transition-transform duration-700" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', filter: 'brightness(1.0) saturate(0.96)' }} />
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute inset-0 bg-gradient-to-t from-[#020d1a] via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${accent}60, transparent 60%)` }} />

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Phone, MapPin, ArrowRight, Mail, ShieldCheck, CircleAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { trackEvent } from '@/lib/analytics';
 import { supabase } from '@/lib/supabase';
 
 const serviceOptions = [
@@ -28,49 +29,57 @@ const fieldCls = 'w-full bg-white/[0.03] border border-white/[0.07] focus:border
 
 export default function ContactCTA() {
   const router = useRouter();
+  const submitting = useRef(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
 
-    const form = e.currentTarget;
-    const data = {
-      name: (form.elements.namedItem('name') as HTMLInputElement).value,
-      company: (form.elements.namedItem('company') as HTMLInputElement).value,
-      email: (form.elements.namedItem('email') as HTMLInputElement).value,
-      phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
-      service: (form.elements.namedItem('service') as HTMLSelectElement).value,
-      location: (form.elements.namedItem('location') as HTMLSelectElement).value,
-      timeline: (form.elements.namedItem('timeline') as HTMLSelectElement).value,
-      budget: (form.elements.namedItem('budget') as HTMLSelectElement).value,
-      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
-    };
+    try {
+      const form = e.currentTarget;
+      const data = {
+        name: (form.elements.namedItem('name') as HTMLInputElement).value,
+        company: (form.elements.namedItem('company') as HTMLInputElement).value,
+        email: (form.elements.namedItem('email') as HTMLInputElement).value,
+        phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+        service: (form.elements.namedItem('service') as HTMLSelectElement).value,
+        location: (form.elements.namedItem('location') as HTMLSelectElement).value,
+        timeline: (form.elements.namedItem('timeline') as HTMLSelectElement).value,
+        budget: (form.elements.namedItem('budget') as HTMLSelectElement).value,
+        message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+      };
 
-    const { error: dbError } = await supabase.from('quotes').insert(data);
+      const { error: dbError } = await supabase.from('quotes').insert(data);
 
-    if (dbError) {
-      setError('Something went wrong. Please try again or call us directly.');
+      if (dbError) {
+        setError('Something went wrong. Please try again or call us directly.');
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
+
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(data),
+      }).catch(() => {});
+
+      trackEvent('generate_lead', { form_id: 'homepage_quote' });
+
+      router.push('/contact/thank-you');
+    } catch {
+      submitting.current = false;
       setLoading(false);
-      return;
+      setError('Something went wrong. Please try again or call us directly.');
     }
-
-    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify(data),
-    }).catch(() => {});
-
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'generate_lead', { event_category: 'engagement' });
-    }
-
-    router.push('/contact/thank-you');
   }
 
   return (

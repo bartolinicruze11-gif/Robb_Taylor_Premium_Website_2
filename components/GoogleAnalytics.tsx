@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
 
-const MEASUREMENT_ID = 'G-LNRQ7T148Z';
+import { GA_MEASUREMENT_ID as MEASUREMENT_ID } from '@/lib/analytics';
 
 export default function GoogleAnalytics() {
   const [accepted, setAccepted] = useState(false);

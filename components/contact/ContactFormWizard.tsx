@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,6 +8,7 @@ import {
   Droplets, Shovel, Waves, Truck, Building2, Layers,
   ChevronRight, ChevronLeft, MapPin, User, Mail, Phone,
 } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 import { supabase } from '@/lib/supabase';
 
 const serviceOptions = [
@@ -52,6 +53,7 @@ function OptionCard({ selected, onClick, children }: { selected: boolean; onClic
 export default function ContactFormWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const submitting = useRef(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [direction, setDirection] = useState(1);
@@ -65,7 +67,9 @@ export default function ContactFormWizard() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting.current) return;
     if (!canNext) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -73,6 +77,7 @@ export default function ContactFormWizard() {
       const { error: dbError } = await supabase.from('quotes').insert(data);
       if (dbError) {
         setError('Something went wrong saving your request. Please try again or call us directly.');
+        submitting.current = false;
         setLoading(false);
         return;
       }
@@ -81,8 +86,10 @@ export default function ContactFormWizard() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}` },
         body: JSON.stringify(data),
       }).catch(() => {});
+      trackEvent('generate_lead', { form_id: 'contact_quote' });
       router.push('/contact/thank-you');
     } catch {
+      submitting.current = false;
       setError('An unexpected error occurred. Please try again or call us directly.');
       setLoading(false);
     }

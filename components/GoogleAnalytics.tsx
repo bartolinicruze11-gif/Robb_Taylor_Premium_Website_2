@@ -13,6 +13,11 @@ export default function GoogleAnalytics() {
       const enabled = choice === 'accepted';
       // Stop collection if consent changes after the scripts have loaded.
       (window as unknown as Record<string, unknown>)[`ga-disable-${MEASUREMENT_ID}`] = !enabled;
+      const tags = window as unknown as { gtag?: (...args: unknown[]) => void };
+      tags.gtag?.('consent', 'update', {
+        analytics_storage: enabled ? 'granted' : 'denied',
+        ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+      });
       setAccepted(enabled);
     };
     const read = () => {
@@ -35,7 +40,7 @@ export default function GoogleAnalytics() {
     <>
       <Script id="google-analytics-init" strategy="afterInteractive">{`
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
         gtag('js', new Date());
         gtag('config', '${MEASUREMENT_ID}');
       `}</Script>

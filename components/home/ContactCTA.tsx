@@ -168,7 +168,7 @@ export default function ContactCTA() {
             <div className="h-[2px] bg-gradient-to-r from-blue-600 via-blue-400/50 to-transparent" />
 
             <div className="p-8 lg:p-10">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <form id="homepage_quote" name="homepage_quote" onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <h3 className="text-white font-bold text-lg mb-1">Tell us about your project</h3>
 
                 {error && (

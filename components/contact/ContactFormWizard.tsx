@@ -68,12 +68,16 @@ export default function ContactFormWizard() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting.current) return;
-    if (!canNext) return;
+    if (step !== 2 || !canNext) return;
+    if (!sel.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sel.email.trim())) {
+      setError('Please enter your name and a valid email address.');
+      return;
+    }
     submitting.current = true;
     setLoading(true);
     setError(null);
     try {
-      const data = { name: sel.name, company: sel.company || '', email: sel.email, phone: sel.phone || '', service: sel.service, location: sel.location, budget: '', timeline: '', message: sel.message || '' };
+      const data = { name: sel.name.trim(), company: sel.company || '', email: sel.email.trim().toLowerCase(), phone: sel.phone || '', service: sel.service, location: sel.location, budget: '', timeline: '', message: sel.message || '' };
       const { error: dbError } = await supabase.from('quotes').insert(data);
       if (dbError) {
         setError('Something went wrong saving your request. Please try again or call us directly.');
@@ -102,7 +106,7 @@ export default function ContactFormWizard() {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form id="contact_quote" name="contact_quote" onSubmit={handleSubmit} noValidate>
       <div className="flex items-center gap-2 mb-8">
         {STEPS.map((label, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -113,7 +117,7 @@ export default function ContactFormWizard() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 px-4 py-3 mb-5 rounded-sm">
+        <div role="alert" className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 px-4 py-3 mb-5 rounded-sm">
           <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
           <p className="text-red-300 text-sm">{error}</p>
         </div>
@@ -169,7 +173,7 @@ export default function ContactFormWizard() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}><span className="flex items-center gap-1.5"><User className="w-3 h-3" /> Full Name <span className="text-blue-500">*</span></span></label>
-                      <input name="name" type="text" required value={sel.name} onChange={e => set('name', e.target.value)} placeholder="John Smith" className={inputClass} />
+                      <input name="name" type="text" autoComplete="name" required value={sel.name} onChange={e => set('name', e.target.value)} placeholder="John Smith" className={inputClass} />
                     </div>
                     <div>
                       <label className={labelClass}>Company / Organisation</label>
@@ -179,11 +183,11 @@ export default function ContactFormWizard() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}><span className="flex items-center gap-1.5"><Mail className="w-3 h-3" /> Email <span className="text-blue-500">*</span></span></label>
-                      <input name="email" type="email" required value={sel.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" className={inputClass} />
+                      <input name="email" type="email" autoComplete="email" inputMode="email" required value={sel.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" className={inputClass} />
                     </div>
                     <div>
                       <label className={labelClass}><span className="flex items-center gap-1.5"><Phone className="w-3 h-3" /> Phone</span></label>
-                      <input name="phone" type="tel" value={sel.phone} onChange={e => set('phone', e.target.value)} placeholder="+64 21 000 0000" className={inputClass} />
+                      <input name="phone" type="tel" autoComplete="tel" value={sel.phone} onChange={e => set('phone', e.target.value)} placeholder="+64 21 000 0000" className={inputClass} />
                     </div>
                   </div>
                   <div>

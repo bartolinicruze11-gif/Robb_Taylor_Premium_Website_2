@@ -130,8 +130,7 @@ const localBusinessSchema = {
 
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Earthworks Wellington', description: 'Bulk earthworks, cut and fill, compaction and subgrade preparation for Wellington subdivisions.', url: `${BASE_URL}/services/earthworks` } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Trenching Wellington', description: 'Precision trenching for utility and pipeline installation across Wellington Region.', url: `${BASE_URL}/services/trenching` } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Pipe Installation Wellington', description: 'HDPE, PVC, ductile iron and concrete pipeline installation from small-bore reticulation to large-diameter trunk mains.', url: `${BASE_URL}/services/pipe-installation` } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Site Preparation Wellington', description: 'Site clearance, topsoil stripping, platform preparation and reinstatement for Wellington construction projects.', url: `${BASE_URL}/services/site-preparation` } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Retaining & Piling Works Wellington', description: 'Retaining walls and piling for residential, commercial and infrastructure projects.', url: `${BASE_URL}/services/retaining-piling` } },
     ],
   },
   openingHoursSpecification: [
@@ -167,9 +166,9 @@ const organizationSchema = {
   url: BASE_URL,
   logo: {
     '@type': 'ImageObject',
-    url: `${BASE_URL}/images/Screenshot_2026-05-07_152715.png`,
-    width: 1295,
-    height: 701,
+    url: `${BASE_URL}/images/logo.png`,
+    width: 1024,
+    height: 687,
   },
   contactPoint: {
     '@type': 'ContactPoint',
@@ -189,11 +188,6 @@ const webSiteSchema = {
   name: 'Robb & Taylor Contracting — Civil Contractors Wellington',
   description: 'Wellington Region civil contractors specialising in water infrastructure, drainage, earthworks and civil construction.',
   publisher: { '@id': `${BASE_URL}/#organization` },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: { '@type': 'EntryPoint', urlTemplate: `${BASE_URL}/contact?q={search_term_string}` },
-    'query-input': 'required name=search_term_string',
-  },
 };
 
 

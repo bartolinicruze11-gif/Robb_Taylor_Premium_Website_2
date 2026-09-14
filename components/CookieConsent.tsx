@@ -41,6 +41,13 @@ export default function CookieConsent() {
   };
 
   return (
+    <>
+      {!visible && (
+        <button type="button" onClick={() => setVisible(true)}
+          className="fixed bottom-3 left-3 z-[190] rounded border border-white/15 bg-[#040f1e] px-3 py-2 text-xs text-[#94b0c8] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
+          Cookie settings
+        </button>
+      )}
     <AnimatePresence>
       {visible && (
         <motion.div
@@ -72,7 +79,7 @@ export default function CookieConsent() {
               <div>
                 <p className="text-white font-bold text-sm mb-1">Cookie Notice</p>
                 <p className="text-[#5a7a8e] text-xs leading-relaxed">
-                  This site uses cookies and analytics to understand how visitors use our services. Under the New Zealand Privacy Act 2020, we are required to inform you.{' '}
+                  With your permission, we use analytics cookies to understand visits and enquiries. You can change your choice using Cookie settings.{' '}
                   <Link href="/privacy#cookies" className="text-blue-400 hover:text-blue-300 transition-colors underline underline-offset-2">
                     Learn more
                   </Link>
@@ -85,7 +92,7 @@ export default function CookieConsent() {
                 onClick={accept}
                 className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold uppercase tracking-[0.14em] py-2.5 transition-colors duration-150"
               >
-                Accept All
+                Accept analytics
               </button>
               <button
                 onClick={decline}
@@ -98,5 +105,6 @@ export default function CookieConsent() {
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }

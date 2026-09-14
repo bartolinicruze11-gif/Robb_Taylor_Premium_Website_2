@@ -13,8 +13,8 @@ type MediaItem =
   | { type: 'image'; src: string; position: string; duration: number };
 
 const heroMedia: MediaItem[] = [
-  { type: 'image', src: '/images/Screenshot_2026-05-26_095401.png',             position: 'center 50%', duration: 6000 },
   { type: 'video', src: '/videos/hero-optimized.mp4' },
+  { type: 'image', src: '/images/Screenshot_2026-05-26_095401.png',             position: 'center 50%', duration: 6000 },
   { type: 'image', src: '/images/WhatsApp_Image_2026-05-21_at_6.50.00_AM.jpeg', position: 'center 45%', duration: 6000 },
   { type: 'image', src: '/images/Screenshot_2026-05-27_091422.png',             position: 'center 45%', duration: 6000 },
   { type: 'image', src: '/images/Screenshot_2026-05-27_091929.png',             position: 'center 50%', duration: 6000 },
@@ -105,17 +105,18 @@ export default function HeroSection() {
           <div key={media.src} className="absolute inset-0"
             data-hero-media={media.type}
             style={{
-              opacity: (reducedMotion ? mediaIndex === 0 : displayed === mediaIndex || previous === mediaIndex) ? 1 : 0,
+              opacity: (reducedMotion ? mediaIndex === 1 : displayed === mediaIndex || previous === mediaIndex) ? 1 : 0,
               zIndex: displayed === mediaIndex ? 2 : previous === mediaIndex ? 1 : 0,
               transition: reducedMotion ? 'none' : 'opacity 1200ms ease-in-out',
             }}>
             {media.type === 'image' ? (
-              <Image src={media.src} alt="" fill priority={mediaIndex === 0}
+              <Image src={media.src} alt="" fill priority={mediaIndex === 1}
                 sizes="100vw" className="object-cover"
                 style={{ objectPosition: media.position, filter: 'brightness(0.82) saturate(0.95)' }}
                 onLoad={() => setReadyImages(ready => ready.includes(mediaIndex) ? ready : [...ready, mediaIndex])} />
             ) : (
-              <video ref={videoRef} src={media.src} muted playsInline preload="metadata"
+              <video ref={videoRef} src={media.src} muted playsInline preload="auto"
+                poster="/images/Screenshot_2026-05-26_095401.png"
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ filter: 'brightness(0.82) saturate(0.95)' }}
                 onPlaying={() => { showSlide(mediaIndex); setPlayBlocked(false); }}

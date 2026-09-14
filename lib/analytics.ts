@@ -1,4 +1,4 @@
-export const GA_MEASUREMENT_ID = 'G-LNRQ7T148Z';
+export const GA_MEASUREMENT_ID = 'G-RHLENS2SJT';
 
 export type TrackedEvent = 'generate_lead' | 'phone_click' | 'email_click' | 'partner_click';
 type EventDetails = { form_id?: 'homepage_quote' | 'contact_quote'; partner_name?: 'EMT Demolition' };

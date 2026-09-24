@@ -10,7 +10,7 @@ export default function ConversionTracking() {
       const link = event.target.closest('a[href]');
       if (!link) return;
       const name = trackedLinkEvent(link.getAttribute('href') || '');
-      if (name) trackEvent(name, name === 'partner_click' ? { partner_name: 'EMT Demolition' } : {});
+      if (name) trackEvent(name);
     };
     document.addEventListener('click', onClick, true);
     return () => document.removeEventListener('click', onClick, true);

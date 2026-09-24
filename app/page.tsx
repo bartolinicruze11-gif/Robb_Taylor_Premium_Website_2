@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 import HeroSection from '@/components/home/HeroSection';
-import PartnerSection from '@/components/home/PartnerSection';
 import ServicesPreview from '@/components/home/ServicesPreview';
 import InfrastructureSection from '@/components/home/InfrastructureSection';
 import TrustSection from '@/components/home/TrustSection';
@@ -76,7 +75,6 @@ export default function HomePage() {
       />
       <HeroSection />
       <ServicesPreview />
-      <PartnerSection />
       <InfrastructureSection />
       <TrustSection />
       <ContactCTA />

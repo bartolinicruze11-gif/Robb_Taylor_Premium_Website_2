@@ -1,831 +1,188 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Quote, QuoteStatus } from '@/lib/supabase';
-import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
-import {
-  Lock, LogOut, RefreshCw, Phone, Mail, MapPin, Calendar, DollarSign,
-  Briefcase, StickyNote, X, CircleCheck as CheckCircle, Clock, Eye, Archive,
-  Search, Trash2, TrendingUp, FileText, ChevronRight, CircleAlert as AlertCircle,
-  Building2, ChartBar as BarChart3, ShieldCheck, Activity, ArrowLeft, Sparkles,
-  Command, Zap, Layers, Filter, MoveHorizontal as MoreHorizontal, Copy, ExternalLink
-} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import type { Session } from '@supabase/supabase-js';
+import { supabase, type Quote, type QuoteStatus } from '@/lib/supabase';
+import { attentionScore, exportQuotes, workspaceMetrics } from '@/lib/admin-intelligence';
+import { Activity, AlertCircle, BarChart3, Bell, CalendarClock, Check, Download, Inbox, LogOut, Mail, Phone, RefreshCw, Search, ShieldCheck } from 'lucide-react';
 
-const ADMIN_QUOTES_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin-quotes`;
-const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-async function callAdminApi(password: string, body: Record<string, unknown>) {
-  const res = await fetch(ADMIN_QUOTES_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ANON_KEY}`,
-    },
-    body: JSON.stringify({ password, ...body }),
-  });
-  return res.json();
-}
-
-const STATUS_CONFIG: Record<QuoteStatus, { label: string; text: string; bg: string; ring: string; dot: string; icon: typeof Clock }> = {
-  new:      { label: 'New Lead',   text: 'text-sky-200',      bg: 'bg-sky-400/[0.12]',      ring: 'ring-sky-400/40',      dot: 'bg-sky-300',      icon: Sparkles },
-  reviewed: { label: 'Reviewed',   text: 'text-amber-200',    bg: 'bg-amber-400/[0.12]',    ring: 'ring-amber-400/40',    dot: 'bg-amber-300',    icon: Eye },
-  quoted:   { label: 'Quoted',     text: 'text-emerald-200',  bg: 'bg-emerald-400/[0.12]',  ring: 'ring-emerald-400/40',  dot: 'bg-emerald-300',  icon: CheckCircle },
-  closed:   { label: 'Closed',     text: 'text-slate-300',    bg: 'bg-slate-400/[0.10]',    ring: 'ring-slate-400/30',    dot: 'bg-slate-400',    icon: Archive },
+type View = 'inbox' | 'followups' | 'insights' | 'notifications';
+type Event = { id: string; detail: string; created_at: string };
+type Notification = { id: string; status: string; attempts: number; last_error: string | null; sent_at: string | null; created_at: string; quote: { name: string; service: string } | null };
+const stages: QuoteStatus[] = ['new', 'reviewed', 'quoted', 'closed'];
+const input = 'w-full rounded-xl border border-white/10 bg-[#061728] px-3 py-2.5 text-sm text-white outline-none focus:border-sky-400/60';
+const card = 'rounded-2xl border border-sky-300/10 bg-[#0b2135]/85';
+const button = 'rounded-xl border border-sky-300/20 bg-sky-400/10 px-4 py-2.5 text-sm font-semibold text-sky-100 transition hover:bg-sky-400/20 disabled:opacity-40';
+const label = 'mb-1.5 block text-[11px] font-bold uppercase tracking-[0.16em] text-sky-200/55';
+const date = (value: string | null) => value ? new Date(value).toLocaleString('en-NZ', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not set';
+const dateInput = (value: string | null) => {
+  if (!value) return '';
+  const instant = new Date(value);
+  return new Date(instant.getTime() - instant.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
-function StatusPill({ status, size = 'sm' }: { status: QuoteStatus; size?: 'sm' | 'md' }) {
-  const cfg = STATUS_CONFIG[status];
-  const px = size === 'md' ? 'px-2.5 py-1 text-[11px]' : 'px-2 py-0.5 text-[10px]';
-  return (
-    <span className={`inline-flex items-center gap-1.5 ${px} font-bold uppercase tracking-widest rounded-full ring-1 ${cfg.ring} ${cfg.bg} ${cfg.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shadow-[0_0_10px_currentColor]`} />
-      {cfg.label}
-    </span>
-  );
+async function api<T>(token: string, path: string, method = 'GET', payload?: object): Promise<T> {
+  const response = await fetch(path, { method, cache: 'no-store',
+    headers: { Authorization: 'Bearer ' + token, ...(payload ? { 'Content-Type': 'application/json' } : {}) },
+    body: payload ? JSON.stringify(payload) : undefined });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || 'Request failed');
+  return result as T;
 }
 
-function AnimatedNumber({ value }: { value: number }) {
-  const mv = useMotionValue(0);
-  const spring = useSpring(mv, { damping: 30, stiffness: 120 });
-  const [display, setDisplay] = useState(0);
-  useEffect(() => { mv.set(value); }, [value, mv]);
-  useEffect(() => spring.on('change', v => setDisplay(Math.round(v))), [spring]);
-  return <span className="tabular-nums">{display}</span>;
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function relTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  return `${months}mo ago`;
-}
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        navigator.clipboard?.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1600);
-      }}
-      className="text-sky-300/40 hover:text-sky-200 transition-colors flex-shrink-0"
-      aria-label="Copy"
-    >
-      {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
-    </button>
-  );
-}
-
-function QuoteWorkspace({
-  quote, password, onUpdate, onBack, onDelete,
-}: {
-  quote: Quote; password: string; onUpdate: () => void; onBack: () => void; onDelete: (id: string) => void;
-}) {
-  const [notes, setNotes] = useState(quote.admin_notes);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [status, setStatus] = useState<QuoteStatus>(quote.status as QuoteStatus);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => { setNotes(quote.admin_notes); setStatus(quote.status as QuoteStatus); }, [quote.id, quote.admin_notes, quote.status]);
-
-  async function saveNotes() {
-    setSaving(true); setSaved(false);
-    await callAdminApi(password, { action: 'update_notes', id: quote.id, admin_notes: notes });
-    setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+function Access({ session, aal, refresh }: { session: Session | null; aal: string | null; refresh: () => Promise<void> }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [factor, setFactor] = useState('');
+  const [qr, setQr] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!session || aal === 'aal2') return;
+    void supabase.auth.mfa.listFactors().then(({ data }) => setFactor(data?.totp.find(item => item.status === 'verified')?.id ?? ''));
+  }, [session, aal]);
+  async function signIn(event: React.FormEvent) {
+    event.preventDefault(); setBusy(true); setError('');
+    const { error: problem } = await supabase.auth.signInWithPassword({ email, password });
+    setPassword('');
+    if (problem) setError('Sign in failed. Check your credentials.'); else await refresh();
+    setBusy(false);
   }
-
-  async function updateStatus(s: QuoteStatus) {
-    setStatus(s);
-    await callAdminApi(password, { action: 'update_status', id: quote.id, status: s });
-    onUpdate();
+  async function enroll() {
+    setBusy(true); setError('');
+    const { data, error: problem } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Robb & Taylor Operations' });
+    if (problem || !data?.totp) setError('Authenticator setup failed.'); else { setFactor(data.id); setQr(data.totp.qr_code); }
+    setBusy(false);
   }
-
-  async function handleDelete() {
-    setDeleting(true);
-    await callAdminApi(password, { action: 'delete', id: quote.id });
-    onDelete(quote.id);
+  async function verify(event: React.FormEvent) {
+    event.preventDefault(); setBusy(true); setError('');
+    const { data: challenge, error: problem } = await supabase.auth.mfa.challenge({ factorId: factor });
+    if (problem || !challenge) setError('Verification could not start.');
+    else {
+      const { error: failure } = await supabase.auth.mfa.verify({ factorId: factor, challengeId: challenge.id, code });
+      if (failure) setError('That code did not verify.'); else { setCode(''); setQr(''); await refresh(); }
+    }
+    setBusy(false);
   }
-
-  return (
-    <motion.div
-      key={quote.id}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full"
-    >
-      <button
-        onClick={onBack}
-        className="lg:hidden inline-flex items-center gap-1.5 text-sky-300/60 hover:text-sky-100 text-xs font-semibold uppercase tracking-wider transition-colors mb-4"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" /> Back to enquiries
-      </button>
-
-      <div className="relative overflow-hidden rounded-2xl border border-sky-400/15 bg-gradient-to-br from-[#0a2138] via-[#081930] to-[#061527] shadow-[0_20px_60px_rgba(2,10,20,0.35)]">
-        <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.18)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(ellipse_at_right,rgba(34,211,238,0.10)_0%,transparent_70%)] pointer-events-none" />
-
-        <div className="relative p-6 sm:p-8 border-b border-sky-400/10 flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-start gap-4 min-w-0 flex-1">
-            <div className="relative w-14 h-14 flex-shrink-0">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 opacity-30 blur-md" />
-              <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-sky-400/25 to-cyan-500/10 border border-sky-400/40 flex items-center justify-center backdrop-blur-sm">
-                <span className="text-sky-100 font-black text-lg">{quote.name.charAt(0).toUpperCase()}</span>
-              </div>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <StatusPill status={status} size="md" />
-                <span className="text-sky-300/40 text-[10px] uppercase tracking-widest">&middot;</span>
-                <span className="text-sky-300/50 text-[10px] uppercase tracking-widest">Received {relTime(quote.created_at)}</span>
-              </div>
-              <h2 className="text-white font-black text-2xl sm:text-3xl tracking-tight leading-tight">{quote.name}</h2>
-              {quote.company && (
-                <p className="text-sky-300/70 text-sm mt-1 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5" />{quote.company}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {quote.email && (
-              <a href={`mailto:${quote.email}`}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-400/15 hover:bg-sky-400/25 border border-sky-400/30 text-sky-100 text-xs font-bold uppercase tracking-wider rounded-lg transition-all hover:shadow-[0_8px_20px_rgba(56,189,248,0.15)]">
-                <Mail className="w-3.5 h-3.5" />Reply
-              </a>
-            )}
-            {quote.phone && (
-              <a href={`tel:${quote.phone}`}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-sky-100 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors">
-                <Phone className="w-3.5 h-3.5" />Call
-              </a>
-            )}
-          </div>
-        </div>
-
-        <div className="relative p-6 sm:p-8 flex flex-col gap-6">
-          <div>
-            <p className="text-sky-300/40 text-[10px] uppercase tracking-[0.25em] font-bold mb-3 flex items-center gap-1.5">
-              <Zap className="w-3 h-3" /> Pipeline Stage
-            </p>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-              {(Object.keys(STATUS_CONFIG) as QuoteStatus[]).map(s => {
-                const cfg = STATUS_CONFIG[s];
-                const Icon = cfg.icon;
-                const active = status === s;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => updateStatus(s)}
-                    className={`group relative flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
-                      active
-                        ? `${cfg.bg} ${cfg.text} border-transparent ring-1 ${cfg.ring} shadow-[0_8px_20px_rgba(0,0,0,0.2)]`
-                        : 'border-white/10 text-sky-300/50 hover:border-sky-400/30 hover:text-sky-100 hover:bg-white/[0.03]'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />{cfg.label}
-                    {active && (
-                      <motion.span layoutId="stageDot" className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${cfg.dot} shadow-[0_0_10px_currentColor]`} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="p-5 rounded-xl bg-black/20 border border-sky-400/10 backdrop-blur-sm">
-                <p className="text-sky-300/40 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Contact</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { icon: Mail,      label: 'Email',    value: quote.email,    href: `mailto:${quote.email}`, copy: true },
-                    { icon: Phone,     label: 'Phone',    value: quote.phone,    href: quote.phone ? `tel:${quote.phone}` : undefined, copy: true },
-                    { icon: MapPin,    label: 'Location', value: quote.location, href: undefined, copy: false },
-                    { icon: Building2, label: 'Company',  value: quote.company,  href: undefined, copy: false },
-                  ].filter(f => f.value).map(({ icon: Icon, label, value, href, copy }) => (
-                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 bg-white/[0.02] border border-white/5 rounded-lg group hover:border-sky-400/25 transition-colors">
-                      <Icon className="w-3.5 h-3.5 text-sky-300/60 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sky-300/40 text-[9px] uppercase tracking-widest">{label}</p>
-                        {href ? (
-                          <a href={href} className="text-sky-50 hover:text-white text-sm font-medium truncate block transition-colors">{value}</a>
-                        ) : (
-                          <p className="text-sky-50 text-sm font-medium truncate">{value}</p>
-                        )}
-                      </div>
-                      {copy && <CopyButton text={value} />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {quote.message && (
-                <div className="p-5 rounded-xl bg-black/20 border border-sky-400/10 backdrop-blur-sm">
-                  <p className="text-sky-300/40 text-[10px] uppercase tracking-[0.25em] font-bold mb-3">Project Brief</p>
-                  <p className="text-sky-50/90 text-sm leading-[1.7] whitespace-pre-wrap">{quote.message}</p>
-                </div>
-              )}
-
-              <div className="p-5 rounded-xl bg-black/20 border border-sky-400/10 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sky-300/40 text-[10px] uppercase tracking-[0.25em] font-bold flex items-center gap-1.5">
-                    <StickyNote className="w-3 h-3" />Internal Notes
-                  </p>
-                  <AnimatePresence>
-                    {saved && (
-                      <motion.span
-                        initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                        className="text-emerald-300 text-[10px] uppercase tracking-wider flex items-center gap-1"
-                      >
-                        <CheckCircle className="w-3 h-3" /> Saved
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <textarea
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  rows={5}
-                  placeholder="Log calls, follow-ups, pricing discussions, site visit notes..."
-                  className="w-full bg-black/30 border border-white/5 focus:border-sky-400/50 text-sky-50 text-sm px-3.5 py-3 outline-none resize-none rounded-lg transition-colors placeholder-sky-300/25 leading-relaxed"
-                />
-                <button
-                  onClick={saveNotes}
-                  disabled={saving}
-                  className="mt-3 px-4 py-2 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all disabled:opacity-50 shadow-[0_6px_16px_rgba(14,165,233,0.25)]"
-                >
-                  {saving ? 'Saving…' : 'Save Notes'}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-5 rounded-xl bg-black/20 border border-sky-400/10 backdrop-blur-sm">
-                <p className="text-sky-300/40 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Project Details</p>
-                <dl className="flex flex-col gap-3">
-                  {[
-                    { icon: Briefcase,  label: 'Service',   value: quote.service },
-                    { icon: DollarSign, label: 'Budget',    value: quote.budget },
-                    { icon: Calendar,   label: 'Timeline',  value: quote.timeline },
-                    { icon: Calendar,   label: 'Submitted', value: formatDate(quote.created_at) },
-                  ].filter(f => f.value).map(({ icon: Icon, label, value }) => (
-                    <div key={label} className="pb-3 last:pb-0 border-b border-white/5 last:border-0">
-                      <dt className="text-sky-300/40 text-[9px] uppercase tracking-widest flex items-center gap-1.5 mb-1">
-                        <Icon className="w-3 h-3" />{label}
-                      </dt>
-                      <dd className="text-sky-50 text-sm font-medium">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-
-              <div className="p-5 rounded-xl bg-red-500/[0.04] border border-red-500/15">
-                <p className="text-red-300/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-3">Danger Zone</p>
-                {!confirmDelete ? (
-                  <button
-                    onClick={() => setConfirmDelete(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-red-500/20 hover:border-red-500/40 text-red-300 hover:text-red-200 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />Delete Enquiry
-                  </button>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-red-300 text-xs leading-relaxed">This permanently removes the enquiry and cannot be undone.</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleDelete}
-                        disabled={deleting}
-                        className="flex-1 py-2 bg-red-500/25 border border-red-500/40 text-red-100 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-red-500/35 transition-colors disabled:opacity-50"
-                      >
-                        {deleting ? 'Deleting…' : 'Confirm'}
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(false)}
-                        className="flex-1 py-2 border border-white/10 text-sky-300/70 hover:text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors"
-                      >Cancel</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
+  return <div className="flex min-h-screen items-center justify-center bg-[#04111e] px-5 text-white"><div className={card + ' w-full max-w-md p-8 shadow-2xl'}>
+    <div className="mb-8 flex items-center gap-3"><ShieldCheck className="text-sky-200" size={28} /><div><h1 className="text-xl font-black">Robb &amp; Taylor</h1><p className="text-xs uppercase tracking-[0.2em] text-sky-200/50">Operations workspace</p></div></div>
+    {error && <p role="alert" className="mb-4 rounded-xl bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
+    {!session ? <form onSubmit={signIn} className="space-y-4"><h2 className="text-2xl font-bold">Named access</h2><p className="text-sm text-sky-100/55">Sign in and verify your authenticator.</p><label className={label}>Email<input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} className={input + ' mt-2'} /></label><label className={label}>Password<input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} className={input + ' mt-2'} /></label><button disabled={busy} className="w-full rounded-xl bg-sky-500 p-3 font-bold disabled:opacity-50">{busy ? 'Signing in…' : 'Sign in'}</button></form>
+      : session.user.app_metadata?.role !== 'robb_admin' ? <div className="space-y-4"><p className="text-sm text-sky-100/60">This account does not have a Robb &amp; Taylor admin role.</p><button onClick={() => void supabase.auth.signOut()} className={button}>Sign out</button></div>
+      : <div className="space-y-4"><h2 className="text-2xl font-bold">Verify account</h2><p className="text-sm text-sky-100/55">Use a six-digit authenticator code.</p>{!factor && <button onClick={() => void enroll()} disabled={busy} className={button}>Set up authenticator</button>}{qr && <div className="rounded-xl bg-white p-4 text-center text-xs text-slate-800"><Image unoptimized width={176} height={176} src={qr} alt="Authenticator setup QR code" className="mx-auto h-44 w-44" />Scan in an authenticator app.</div>}{factor && <form onSubmit={verify} className="space-y-3"><label className={label}>Verification code<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" required value={code} onChange={e => setCode(e.target.value)} className={input + ' mt-2 text-center font-mono text-xl tracking-widest'} /></label><button disabled={busy} className="w-full rounded-xl bg-sky-500 p-3 font-bold disabled:opacity-50">{busy ? 'Verifying…' : 'Open workspace'}</button></form>}<button onClick={() => void supabase.auth.signOut()} className="text-xs text-sky-200/50">Sign out</button></div>}
+  </div></div>;
 }
 
-function QuoteRow({
-  quote, selected, onClick, index,
-}: { quote: Quote; selected: boolean; onClick: () => void; index: number }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.02, 0.25), duration: 0.3 }}
-      onClick={onClick}
-      className={`w-full text-left group relative flex items-start gap-3 px-4 py-3.5 border-l-2 transition-all ${
-        selected
-          ? 'bg-sky-400/[0.10] border-l-sky-400 shadow-[inset_0_0_50px_rgba(56,189,248,0.06)]'
-          : 'border-l-transparent hover:bg-white/[0.03] hover:border-l-sky-400/40'
-      }`}
-    >
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border transition-all ${
-        selected
-          ? 'bg-gradient-to-br from-sky-400/30 to-cyan-500/15 border-sky-400/50'
-          : 'bg-white/[0.03] border-white/10 group-hover:border-sky-400/30'
-      }`}>
-        <span className={`font-black text-xs ${selected ? 'text-sky-100' : 'text-sky-200/80'}`}>
-          {quote.name.charAt(0).toUpperCase()}
-        </span>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <p className={`text-sm font-semibold truncate leading-tight ${selected ? 'text-white' : 'text-sky-50'}`}>{quote.name}</p>
-          <span className="text-sky-300/40 text-[10px] font-medium flex-shrink-0 tabular-nums">{relTime(quote.created_at)}</span>
-        </div>
-        <p className="text-sky-300/55 text-[11px] truncate mb-1.5">{quote.service || quote.email}</p>
-        <StatusPill status={quote.status as QuoteStatus} />
-      </div>
-      <ChevronRight className={`w-4 h-4 flex-shrink-0 mt-3 transition-all ${
-        selected ? 'text-sky-200 translate-x-0.5' : 'text-sky-300/25 group-hover:text-sky-300/60 group-hover:translate-x-0.5'
-      }`} />
-    </motion.button>
-  );
+function Enquiry({ quote, token, onSaved }: { quote: Quote; token: string; onSaved: (q: Quote) => void }) {
+  const [draft, setDraft] = useState(quote);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState('');
+  useEffect(() => {
+    setDraft(quote); setError(''); setSaved('');
+    void api<{ data: Event[] }>(token, '/api/admin/quotes?activity=' + quote.id).then(result => setEvents(result.data)).catch(() => setEvents([]));
+  }, [quote, token]);
+  async function save(contact = false) {
+    setBusy(true); setError(''); setSaved('');
+    try {
+      const payload = { id: quote.id, status: draft.status, priority: draft.priority, next_action: draft.next_action, follow_up_at: draft.follow_up_at, admin_notes: draft.admin_notes, ...(contact ? { mark_contacted: true } : {}) };
+      const result = await api<{ data: Quote; activity_recorded: boolean }>(token, '/api/admin/quotes', 'PATCH', payload);
+      onSaved(result.data); setSaved(result.activity_recorded ? 'Saved and logged' : 'Saved; activity history needs attention');
+      try {
+        const log = await api<{ data: Event[] }>(token, '/api/admin/quotes?activity=' + quote.id);
+        setEvents(log.data);
+      } catch { setSaved('Saved; activity history could not be refreshed'); }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Save failed'); }
+    finally { setBusy(false); }
+  }
+  return <div className={card + ' overflow-hidden'}><div className="border-b border-white/10 bg-gradient-to-br from-sky-400/10 to-transparent p-6"><div className="mb-2 flex items-center gap-3 text-xs text-sky-100/50"><span className="rounded-full bg-sky-400/15 px-2 py-1 font-bold uppercase text-sky-200">{quote.status}</span>Received {date(quote.created_at)}</div><h2 className="text-2xl font-black">{quote.name}</h2><p className="mt-1 text-sm text-sky-100/55">{quote.company || quote.service} · {quote.location || 'Location not provided'}</p><div className="mt-5 flex flex-wrap gap-2"><a href={'mailto:' + quote.email} className={button + ' inline-flex items-center gap-2'}><Mail size={15} /> Email</a>{quote.phone && <a href={'tel:' + quote.phone} className={button + ' inline-flex items-center gap-2'}><Phone size={15} /> Call</a>}<button onClick={() => void save(true)} disabled={busy} className={button + ' inline-flex items-center gap-2'}><Check size={15} /> Record contact</button></div></div>
+    <div className="grid gap-7 p-6 xl:grid-cols-[1fr_235px]"><div className="space-y-5"><div><h3 className={label}>Project brief</h3><p className="whitespace-pre-wrap rounded-xl bg-black/15 p-4 text-sm leading-6 text-sky-50/85">{quote.message || 'No brief supplied.'}</p><p className="mt-3 text-xs text-sky-100/55">Service: {quote.service} · Budget: {quote.budget || 'Unspecified'} · Timeline: {quote.timeline || 'Unspecified'}</p><p className="mt-1 text-xs text-sky-100/55">{quote.email} · {quote.phone}</p></div>
+      <div className="grid gap-4 sm:grid-cols-2"><label><span className={label}>Pipeline stage</span><select value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value as QuoteStatus })} className={input}>{stages.map(s => <option key={s} value={s}>{s}</option>)}</select></label><label><span className={label}>Priority</span><select value={draft.priority} onChange={e => setDraft({ ...draft, priority: e.target.value as Quote['priority'] })} className={input}><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label><label className="sm:col-span-2"><span className={label}>Next action</span><input maxLength={500} value={draft.next_action} onChange={e => setDraft({ ...draft, next_action: e.target.value })} placeholder="Call, site visit, estimate, or follow up" className={input} /></label><label className="sm:col-span-2"><span className={label}>Follow-up date and time</span><input type="datetime-local" value={dateInput(draft.follow_up_at)} onChange={e => setDraft({ ...draft, follow_up_at: e.target.value ? new Date(e.target.value).toISOString() : null })} className={input} /></label><label className="sm:col-span-2"><span className={label}>Internal notes</span><textarea rows={5} maxLength={8000} value={draft.admin_notes} onChange={e => setDraft({ ...draft, admin_notes: e.target.value })} className={input} /></label></div>
+      {error && <p role="alert" className="flex gap-2 text-sm text-red-300"><AlertCircle size={15} />{error}</p>}{saved && <p role="status" className="flex gap-2 text-sm text-emerald-300"><Check size={15} />{saved}</p>}<button disabled={busy} onClick={() => void save()} className="rounded-xl bg-sky-500 px-5 py-3 text-sm font-bold disabled:opacity-40">{busy ? 'Saving…' : 'Save enquiry'}</button></div>
+      <aside className="space-y-6"><div className="rounded-xl bg-sky-400/5 p-4"><h3 className={label}>Attention signal</h3><p className="text-3xl font-black">{Math.max(0, attentionScore(quote))}</p><p className="mt-2 text-xs leading-5 text-sky-100/50">Rules use stage, due date, age, and priority. Review the enquiry yourself.</p></div><div><h3 className={label}>Timing</h3><p className="text-xs text-sky-100/65">Follow-up: {date(quote.follow_up_at)}</p><p className="mt-2 text-xs text-sky-100/65">Contact recorded: {date(quote.last_contacted_at)}</p></div><div><h3 className={label}>Activity</h3><div className="space-y-3 border-l border-sky-300/20 pl-3">{events.length ? events.map(item => <div key={item.id}><p className="text-xs font-semibold">{item.detail}</p><p className="text-[11px] text-sky-100/40">{date(item.created_at)}</p></div>) : <p className="text-xs text-sky-100/40">Changes will appear here.</p>}</div></div></aside></div>
+  </div>;
 }
 
 export default function AdminClient() {
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState('');
-  const [enteredPassword, setEnteredPassword] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [aal, setAal] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
   const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [view, setView] = useState<View>('inbox');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<QuoteStatus | 'all'>('all');
-  const [selected, setSelected] = useState<Quote | null>(null);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  const fetchQuotes = useCallback(async (pass: string) => {
-    setLoading(true);
-    const result = await callAdminApi(pass, { action: 'list' });
-    const list: Quote[] = result.data ?? [];
-    setQuotes(list);
-    setSelected(prev => prev ? list.find(q => q.id === prev.id) ?? null : null);
-    setLoading(false);
+  const [stage, setStage] = useState<QuoteStatus | 'all'>('all');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const token = session?.access_token ?? '';
+  const authed = ready && !!token && aal === 'aal2' && session?.user.app_metadata?.role === 'robb_admin';
+  const refreshSession = useCallback(async () => {
+    const { data: { session: next } } = await supabase.auth.getSession();
+    setSession(next);
+    if (next) { const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(); setAal(data?.currentLevel ?? 'aal1'); }
+    else setAal(null);
+    setReady(true);
   }, []);
-
   useEffect(() => {
-    if (authed) fetchQuotes(enteredPassword);
-  }, [authed, enteredPassword, fetchQuotes]);
-
-  useEffect(() => {
-    if (!authed) return;
-    function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setPaletteOpen(true);
-      } else if (e.key === 'Escape') {
-        setPaletteOpen(false);
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [authed]);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const result = await callAdminApi(password, { action: 'list' });
-    setLoading(false);
-    if (!result || result.error || !Array.isArray(result.data)) {
-      setAuthError(
-        result?.error && result.error !== 'Unauthorized'
-          ? result.error
-          : 'Incorrect password. Please try again.'
-      );
-      return;
-    }
-    setEnteredPassword(password);
-    setQuotes(result.data);
-    setAuthed(true);
-    setAuthError(null);
-  }
-
+    void refreshSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => setTimeout(() => { void refreshSession(); }, 0));
+    return () => subscription.unsubscribe();
+  }, [refreshSession]);
+  const refresh = useCallback(async () => {
+    if (!token) return;
+    setBusy(true); setError('');
+    try {
+      const [leads, queue] = await Promise.all([api<{ data: Quote[] }>(token, '/api/admin/quotes'), api<{ data: Notification[] }>(token, '/api/admin/notifications')]);
+      setQuotes(leads.data); setNotifications(queue.data);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Workspace unavailable'); }
+    finally { setBusy(false); }
+  }, [token]);
+  useEffect(() => { if (authed) void refresh(); else { setQuotes([]); setNotifications([]); } }, [authed, refresh]);
+  const metrics = useMemo(() => workspaceMetrics(quotes), [quotes]);
+  const selected = quotes.find(q => q.id === selectedId) ?? null;
   const filtered = useMemo(() => quotes.filter(q => {
-    const matchStatus = filterStatus === 'all' || q.status === filterStatus;
-    const s = search.toLowerCase();
-    const matchSearch = !s ||
-      q.name.toLowerCase().includes(s) ||
-      q.email.toLowerCase().includes(s) ||
-      q.company.toLowerCase().includes(s) ||
-      q.service.toLowerCase().includes(s) ||
-      q.location.toLowerCase().includes(s);
-    return matchStatus && matchSearch;
-  }), [quotes, filterStatus, search]);
-
-  const counts = {
-    all:      quotes.length,
-    new:      quotes.filter(q => q.status === 'new').length,
-    reviewed: quotes.filter(q => q.status === 'reviewed').length,
-    quoted:   quotes.filter(q => q.status === 'quoted').length,
-    closed:   quotes.filter(q => q.status === 'closed').length,
-  };
-
-  const stats = [
-    { label: 'Total Enquiries', value: counts.all, icon: Layers, tint: 'from-sky-500/[0.15] via-sky-500/[0.05] to-transparent', ring: 'ring-sky-400/25', accent: 'text-sky-300' },
-    { label: 'New Leads',       value: counts.new, icon: Sparkles, tint: 'from-cyan-500/[0.18] via-cyan-500/[0.05] to-transparent', ring: 'ring-cyan-400/30', accent: 'text-cyan-300' },
-    { label: 'Active Pipeline', value: counts.reviewed + counts.quoted, icon: Activity, tint: 'from-amber-500/[0.12] via-amber-500/[0.03] to-transparent', ring: 'ring-amber-400/25', accent: 'text-amber-300' },
-    { label: 'Closed Deals',    value: counts.closed, icon: CheckCircle, tint: 'from-emerald-500/[0.12] via-emerald-500/[0.03] to-transparent', ring: 'ring-emerald-400/25', accent: 'text-emerald-300' },
-  ];
-
-  if (!authed) {
-    return (
-      <div className="min-h-screen relative bg-[#02101f] flex items-center justify-center px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(56,189,248,0.18)_0%,transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_85%,rgba(34,211,238,0.12)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)] [background-size:56px_56px]" />
-
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-sky-500/10 blur-[120px] pointer-events-none"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative w-full max-w-[440px]"
-        >
-          <div className="relative border border-sky-400/20 bg-[#0a1f38]/70 backdrop-blur-2xl overflow-hidden rounded-2xl shadow-[0_30px_100px_rgba(0,0,0,0.6)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
-            <div className="absolute inset-x-0 top-[2px] h-[1px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
-
-            <div className="p-10">
-              <div className="flex items-center justify-center gap-3 mb-8">
-                <div className="relative w-12 h-12">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 opacity-40 blur-md" />
-                  <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400/30 to-cyan-500/15 border border-sky-400/50 flex items-center justify-center">
-                    <ShieldCheck className="w-5 h-5 text-sky-100" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-white font-black text-sm tracking-wide">ROBB &amp; TAYLOR</p>
-                  <p className="text-sky-300/60 text-[10px] uppercase tracking-[0.3em]">Operations Console</p>
-                </div>
-              </div>
-
-              <div className="text-center mb-8">
-                <h1 className="text-white font-black text-2xl mb-2 tracking-tight">Secure Access</h1>
-                <p className="text-sky-300/60 text-sm">Authenticate to enter the command center.</p>
-              </div>
-
-              <form onSubmit={handleLogin} className="flex flex-col gap-3">
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sky-300/50 group-focus-within:text-sky-300 transition-colors" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={e => { setPassword(e.target.value); setAuthError(null); }}
-                    placeholder="Enter password"
-                    autoFocus
-                    className="w-full bg-black/40 border border-white/10 focus:border-sky-400/60 text-white placeholder-sky-300/30 text-sm pl-11 pr-4 py-3.5 outline-none transition-all rounded-lg focus:shadow-[0_0_0_4px_rgba(56,189,248,0.12)]"
-                  />
-                </div>
-                <AnimatePresence>
-                  {authError && (
-                    <motion.p
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="text-red-400 text-xs flex items-center gap-1.5"
-                    >
-                      <AlertCircle className="w-3 h-3 flex-shrink-0" />{authError}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-                <button
-                  type="submit"
-                  disabled={loading || !password}
-                  className="relative overflow-hidden w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm py-3.5 uppercase tracking-[0.2em] transition-all mt-1 rounded-lg shadow-[0_10px_30px_rgba(14,165,233,0.35)] group"
-                >
-                  <span className="relative z-10">{loading ? 'Verifying…' : 'Sign In'}</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                </button>
-              </form>
-
-              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 text-sky-300/40 text-[10px] uppercase tracking-widest">
-                <ShieldCheck className="w-3 h-3" />
-                Encrypted &middot; Audited &middot; Restricted
-              </div>
-            </div>
-          </div>
-          <p className="text-sky-300/25 text-[10px] text-center mt-5 uppercase tracking-widest">
-            Robb &amp; Taylor Contracting Ltd
-          </p>
-        </motion.div>
-      </div>
-    );
+    if (stage !== 'all' && q.status !== stage) return false;
+    if (view === 'followups' && (!q.follow_up_at || q.status === 'closed')) return false;
+    const term = search.trim().toLowerCase();
+    return !term || [q.name,q.company,q.email,q.service,q.location,q.next_action].some(value => value?.toLowerCase().includes(term));
+  }).sort((a, b) => view === 'followups'
+    ? Date.parse(a.follow_up_at || '9999-12-31') - Date.parse(b.follow_up_at || '9999-12-31')
+    : attentionScore(b) - attentionScore(a) || Date.parse(b.created_at) - Date.parse(a.created_at)), [quotes, stage, search, view]);
+  async function queueAction(action: 'send_pending' | 'retry', id?: string) {
+    setBusy(true); setError(''); setMessage('');
+    try {
+      const result = await api<{ sent?: number; failed?: number }>(token, '/api/admin/notifications', 'POST', { action, id });
+      setMessage(action === 'retry' ? 'Notification queued for retry.' : 'Sent ' + (result.sent ?? 0) + ' alerts; ' + (result.failed ?? 0) + ' need attention.');
+      await refresh();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Queue unavailable'); }
+    finally { setBusy(false); }
   }
-
-  return (
-    <div className="min-h-screen bg-[#02101f] text-white relative">
-      <div className="fixed inset-x-0 top-0 h-[500px] bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.10)_0%,transparent_65%)] pointer-events-none" />
-      <div className="fixed inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)] [background-size:56px_56px] pointer-events-none" />
-
-      <header className="sticky top-0 z-40 bg-[#02101f]/85 backdrop-blur-xl border-b border-sky-400/10">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-9 h-9 flex-shrink-0">
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-sky-400 to-cyan-500 opacity-30 blur-md" />
-              <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-sky-400/30 to-cyan-500/10 border border-sky-400/40 flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-sky-100" />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-black text-sm tracking-wide leading-none">ROBB &amp; TAYLOR</p>
-              <p className="text-sky-300/50 text-[9px] uppercase tracking-[0.3em] leading-none mt-1">Operations Console</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setPaletteOpen(true)}
-            className="hidden md:flex items-center gap-3 flex-1 max-w-md mx-4 px-4 py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-sky-400/30 rounded-lg transition-all group"
-          >
-            <Search className="w-4 h-4 text-sky-300/50 group-hover:text-sky-300 transition-colors" />
-            <span className="text-sky-300/50 text-sm flex-1 text-left">Search enquiries...</span>
-            <kbd className="hidden lg:flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono text-sky-300/60 bg-white/[0.05] border border-white/10 rounded">
-              <Command className="w-2.5 h-2.5" />K
-            </kbd>
-          </button>
-
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-emerald-500/[0.10] border border-emerald-400/25 rounded-full">
-              <span className="relative flex w-1.5 h-1.5">
-                <span className="absolute inset-0 rounded-full bg-emerald-300 animate-ping opacity-75" />
-                <span className="relative rounded-full w-1.5 h-1.5 bg-emerald-300" />
-              </span>
-              <span className="text-emerald-200 text-[10px] font-bold uppercase tracking-widest">Live</span>
-            </div>
-            <button
-              onClick={() => fetchQuotes(enteredPassword)}
-              disabled={loading}
-              className="flex items-center gap-1.5 text-sky-300/70 hover:text-white text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-40 px-2 py-1"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:block">Sync</span>
-            </button>
-            <div className="h-5 w-px bg-white/10" />
-            <button
-              onClick={() => { setAuthed(false); setPassword(''); setEnteredPassword(''); setSelected(null); }}
-              className="flex items-center gap-1.5 text-sky-300/70 hover:text-white text-xs font-semibold uppercase tracking-wider transition-colors px-2 py-1"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:block">Sign Out</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 relative">
-        {!selected && (
-          <>
-            <div className="mb-6 flex items-end justify-between flex-wrap gap-4">
-              <div>
-                <p className="text-sky-300/50 text-[10px] uppercase tracking-[0.3em] font-bold mb-1.5">Dashboard</p>
-                <h1 className="text-white font-black text-3xl sm:text-4xl tracking-tight">
-                  Quote Enquiries
-                </h1>
-                <p className="text-sky-300/60 text-sm mt-1.5">
-                  {counts.new > 0 ? (
-                    <><span className="text-sky-200 font-semibold">{counts.new} new</span> lead{counts.new !== 1 ? 's' : ''} awaiting review.</>
-                  ) : 'All caught up. No new leads at this moment.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-              {stats.map(({ label, value, icon: Icon, tint, ring, accent }) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className={`relative rounded-xl border border-white/10 ring-1 ${ring} overflow-hidden group hover:border-white/20 transition-all`}
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${tint} pointer-events-none`} />
-                  <div className="relative p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className={`text-[10px] uppercase tracking-[0.2em] font-bold ${accent}`}>{label}</p>
-                      <Icon className={`w-4 h-4 ${accent} opacity-60`} />
-                    </div>
-                    <p className="text-4xl font-black text-white leading-none">
-                      <AnimatedNumber value={value} />
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className={`grid gap-5 ${selected ? 'lg:grid-cols-[380px_1fr]' : 'grid-cols-1'}`}>
-          <aside className={`${selected ? 'hidden lg:block' : ''}`}>
-            <div className="sticky top-[80px] rounded-2xl border border-sky-400/10 bg-[#061a30]/50 backdrop-blur-sm overflow-hidden">
-              <div className="p-3 border-b border-sky-400/10">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-sky-300/40" />
-                  <input
-                    ref={searchRef}
-                    type="text"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Search name, service, location..."
-                    className="w-full bg-black/30 border border-white/5 focus:border-sky-400/40 text-white placeholder-sky-300/30 text-sm pl-9 pr-8 py-2.5 outline-none rounded-lg transition-colors"
-                  />
-                  {search && (
-                    <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-sky-300/40 hover:text-white transition-colors">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="px-3 pt-3 flex items-center gap-1 overflow-x-auto scrollbar-none">
-                {(['all', 'new', 'reviewed', 'quoted', 'closed'] as const).map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setFilterStatus(s)}
-                    className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all whitespace-nowrap flex items-center gap-1 ${
-                      filterStatus === s
-                        ? 'bg-sky-400/20 text-sky-100 ring-1 ring-sky-400/40'
-                        : 'text-sky-300/45 hover:text-sky-100 hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    {s}
-                    <span className={`text-[9px] ${filterStatus === s ? 'text-sky-200' : 'text-sky-300/30'}`}>
-                      {counts[s]}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <div className={`mt-3 ${selected ? 'max-h-[calc(100vh-260px)]' : 'max-h-[calc(100vh-380px)] min-h-[400px]'} overflow-y-auto overscroll-contain divide-y divide-white/[0.04]`}>
-                {loading && quotes.length === 0 ? (
-                  <div className="flex items-center justify-center py-16 text-sky-300/50 text-sm">
-                    <RefreshCw className="w-4 h-4 animate-spin mr-2" />Loading…
-                  </div>
-                ) : filtered.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                    <FileText className="w-7 h-7 text-sky-300/30 mb-2" />
-                    <p className="text-sky-200/70 font-semibold text-sm">
-                      {quotes.length === 0 ? 'No enquiries yet' : 'No matches'}
-                    </p>
-                    <p className="text-sky-300/40 text-xs mt-1">
-                      {quotes.length === 0 ? 'New submissions will appear here.' : 'Try a different search.'}
-                    </p>
-                  </div>
-                ) : (
-                  filtered.map((quote, i) => (
-                    <QuoteRow
-                      key={quote.id}
-                      quote={quote}
-                      selected={selected?.id === quote.id}
-                      onClick={() => setSelected(selected?.id === quote.id ? null : quote)}
-                      index={i}
-                    />
-                  ))
-                )}
-              </div>
-
-              <div className="px-4 py-2.5 border-t border-sky-400/10 flex items-center justify-between text-[10px] uppercase tracking-widest">
-                <span className="text-sky-300/40">{filtered.length} of {quotes.length}</span>
-                {counts.new > 0 && (
-                  <span className="flex items-center gap-1 text-sky-300">
-                    <span className="w-1 h-1 rounded-full bg-sky-300 shadow-[0_0_8px_currentColor]" />
-                    {counts.new} new
-                  </span>
-                )}
-              </div>
-            </div>
-          </aside>
-
-          <main className="min-w-0">
-            {selected ? (
-              <>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="hidden lg:inline-flex items-center gap-1.5 text-sky-300/60 hover:text-sky-100 text-xs font-semibold uppercase tracking-wider transition-colors mb-4"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
-                </button>
-                <QuoteWorkspace
-                  quote={selected}
-                  password={enteredPassword}
-                  onUpdate={() => fetchQuotes(enteredPassword)}
-                  onBack={() => setSelected(null)}
-                  onDelete={(id) => { setQuotes(prev => prev.filter(q => q.id !== id)); setSelected(null); }}
-                />
-              </>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-sky-400/15 bg-[#061a30]/30 min-h-[400px] flex flex-col items-center justify-center text-center px-8 py-16">
-                <div className="relative w-14 h-14 mb-4">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 opacity-25 blur-lg animate-pulse" />
-                  <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-sky-400/20 to-cyan-500/10 border border-sky-400/30 flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-sky-200" />
-                  </div>
-                </div>
-                <h3 className="text-white font-black text-lg tracking-tight mb-1">Select an enquiry</h3>
-                <p className="text-sky-300/60 text-sm max-w-sm">
-                  Choose a quote from the left to open its full workspace with contact details, project brief, and internal notes.
-                </p>
-                <kbd className="mt-6 hidden md:flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono text-sky-300/60 bg-white/[0.05] border border-white/10 rounded">
-                  Press <Command className="w-2.5 h-2.5" />K to search
-                </kbd>
-              </div>
-            )}
-          </main>
-        </div>
-
-        <p className="text-sky-300/20 text-[10px] text-center mt-8 uppercase tracking-widest">
-          Robb &amp; Taylor Contracting Ltd &middot; Operations Console
-        </p>
-      </div>
-
-      <AnimatePresence>
-        {paletteOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-md z-50"
-              onClick={() => setPaletteOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              className="fixed left-1/2 -translate-x-1/2 top-[15vh] w-[92vw] max-w-xl z-50 bg-[#0a1f38]/95 backdrop-blur-xl border border-sky-400/20 rounded-2xl overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.7)]"
-            >
-              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
-                <Search className="w-4 h-4 text-sky-300/60" />
-                <input
-                  type="text"
-                  autoFocus
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search enquiries..."
-                  className="flex-1 bg-transparent outline-none text-white placeholder-sky-300/40 text-sm"
-                />
-                <kbd className="text-[10px] font-mono text-sky-300/50 bg-white/[0.05] px-2 py-0.5 rounded">Esc</kbd>
-              </div>
-              <div className="max-h-[50vh] overflow-y-auto">
-                {filtered.length === 0 ? (
-                  <p className="text-sky-300/50 text-sm text-center py-10">No results found</p>
-                ) : (
-                  filtered.slice(0, 12).map(q => (
-                    <button
-                      key={q.id}
-                      onClick={() => { setSelected(q); setPaletteOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors border-l-2 border-transparent hover:border-l-sky-400 text-left"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-sky-200 font-black text-xs">{q.name.charAt(0).toUpperCase()}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-semibold truncate">{q.name}</p>
-                        <p className="text-sky-300/50 text-xs truncate">{q.service || q.email}</p>
-                      </div>
-                      <StatusPill status={q.status as QuoteStatus} />
-                    </button>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  function downloadCsv() {
+    const url = URL.createObjectURL(new Blob([exportQuotes(filtered)], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = 'robb-taylor-enquiries.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+  if (!ready) return <div className="flex min-h-screen items-center justify-center bg-[#04111e] text-sky-200"><RefreshCw className="animate-spin" aria-label="Loading" /></div>;
+  if (!authed) return <Access session={session} aal={aal} refresh={refreshSession} />;
+  return <div className="min-h-screen bg-[#04111e] text-white"><header className="sticky top-0 z-20 border-b border-sky-300/10 bg-[#061625]/95 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4"><div className="flex items-center gap-3"><Activity className="text-sky-200" size={24} /><div><p className="text-sm font-black">ROBB &amp; TAYLOR</p><p className="text-[10px] uppercase tracking-[0.2em] text-sky-200/50">Operations intelligence</p></div></div><div className="flex items-center gap-2"><span className="hidden text-xs text-sky-100/50 md:block">{session?.user.email}</span><button onClick={() => void refresh()} disabled={busy} className={button} aria-label="Refresh"><RefreshCw size={15} className={busy ? 'animate-spin' : ''} /></button><button onClick={() => void supabase.auth.signOut()} className={button + ' inline-flex items-center gap-2'}><LogOut size={15} /><span className="hidden sm:inline">Sign out</span></button></div></div></header>
+    <main className="mx-auto max-w-7xl space-y-6 px-5 py-8"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="mb-2 text-[11px] font-bold uppercase tracking-[0.24em] text-sky-300/60">Command centre / live enquiries</p><h1 className="text-3xl font-black sm:text-4xl">Know what needs attention.</h1><p className="mt-2 text-sm text-sky-100/50">Counts come from saved enquiries. No assumed revenue.</p></div><button onClick={downloadCsv} className={button + ' inline-flex items-center gap-2'}><Download size={15} /> Export view</button></div>
+      {error && <p role="alert" className="rounded-xl bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}{message && <p role="status" className="rounded-xl bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</p>}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{([
+        ['New enquiries', metrics.newLeads, 'Awaiting stage review', Inbox],
+        ['Follow-ups due', metrics.due, 'Open and past due', CalendarClock],
+        ['Open pipeline', metrics.open, 'Enquiries, not revenue', Activity],
+        ['Last 30 days', metrics.recent, 'Received enquiries', BarChart3],
+      ] as const).map(([title, value, note, Icon]) => <div key={title} className={card + ' p-5'}><div className="mb-4 flex items-center justify-between text-sky-200/55"><p className="text-[10px] font-bold uppercase tracking-widest">{title}</p><Icon size={17} /></div><p className="text-4xl font-black tabular-nums">{value}</p><p className="mt-2 text-xs text-sky-100/45">{note}</p></div>)}</div>
+      <nav aria-label="Workspace" className="flex gap-1 overflow-x-auto border-b border-white/10">{([
+        ['inbox','Enquiries',Inbox], ['followups','Follow-ups',CalendarClock], ['insights','Insights',BarChart3], ['notifications','Email delivery',Bell],
+      ] as const).map(([key, title, Icon]) => <button key={key} onClick={() => { setView(key); setSelectedId(null); }} className={'flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition ' + (view === key ? 'border-sky-400 text-white' : 'border-transparent text-sky-100/45 hover:text-white')}><Icon size={15} />{title}</button>)}</nav>
+      {(view === 'inbox' || view === 'followups') && <div className="grid gap-5 lg:grid-cols-[335px_1fr]"><aside className={card + ' h-fit overflow-hidden'}><div className="space-y-3 border-b border-white/10 p-4"><label className="relative block"><Search size={16} className="absolute left-3 top-3 text-sky-100/40" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search enquiries" className={input + ' pl-9'} /></label><div className="flex flex-wrap gap-1">{(['all', ...stages] as const).map(s => <button key={s} onClick={() => setStage(s)} className={'rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ' + (stage === s ? 'bg-sky-400/20 text-white' : 'text-sky-100/40')}>{s}</button>)}</div></div><div className="max-h-[68vh] divide-y divide-white/5 overflow-y-auto">{filtered.length ? filtered.map(q => <button key={q.id} onClick={() => setSelectedId(q.id)} className={'w-full p-4 text-left transition hover:bg-sky-400/10 ' + (selectedId === q.id ? 'bg-sky-400/10' : '')}><div className="flex justify-between gap-2"><p className="truncate text-sm font-bold">{q.name}</p><span className="text-xs font-bold text-sky-200">{Math.max(0, attentionScore(q))}</span></div><p className="mt-1 truncate text-xs text-sky-100/50">{q.service} · {q.location || 'No location'}</p><div className="mt-3 flex items-center gap-2"><span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase text-sky-100/60">{q.status}</span>{q.priority !== 'normal' && <span className="text-[10px] font-bold uppercase text-amber-300">{q.priority}</span>}{q.follow_up_at && <span className="ml-auto text-[10px] text-sky-200/60">{new Date(q.follow_up_at).toLocaleDateString('en-NZ')}</span>}</div></button>) : <p className="p-8 text-center text-sm text-sky-100/45">No enquiries match this view.</p>}</div><p className="border-t border-white/10 p-3 text-xs text-sky-100/40">{filtered.length} shown of {quotes.length} loaded (latest 500)</p></aside><section>{selected ? <Enquiry key={selected.id} quote={selected} token={token} onSaved={updated => setQuotes(list => list.map(q => q.id === updated.id ? updated : q))} /> : <div className={card + ' flex min-h-[430px] flex-col items-center justify-center p-8 text-center'}><Inbox size={30} className="mb-4 text-sky-200" /><h2 className="text-xl font-bold">Select an enquiry</h2><p className="mt-2 max-w-sm text-sm text-sky-100/50">Review the brief, assign a next step, schedule a follow-up and keep its activity together.</p></div>}</section></div>}
+      {view === 'insights' && <div className="grid gap-5 lg:grid-cols-2"><section className={card + ' p-6'}><h2 className="text-xl font-bold">Pipeline stages</h2><p className="mb-6 mt-1 text-xs text-sky-100/45">Closed is an admin stage, not proven won revenue.</p>{stages.map(s => { const count = quotes.filter(q => q.status === s).length; return <div key={s} className="mb-4"><div className="mb-1 flex justify-between text-sm capitalize"><span>{s}</span><b>{count}</b></div><div className="h-2 rounded-full bg-white/5"><div className="h-2 rounded-full bg-sky-400" style={{ width: String(quotes.length ? count / quotes.length * 100 : 0) + '%' }} /></div></div>; })}</section><section className={card + ' p-6'}><h2 className="text-xl font-bold">Service demand</h2><p className="mb-6 mt-1 text-xs text-sky-100/45">Enquiries received in the last 30 days.</p>{metrics.serviceCounts.length ? metrics.serviceCounts.map(([service, count]) => <div key={service} className="mb-3 flex justify-between border-b border-white/5 pb-3 text-sm"><span className="text-sky-100/65">{service}</span><b>{count}</b></div>) : <p className="text-sm text-sky-100/45">No recent enquiries.</p>}</section><section className={card + ' p-6 lg:col-span-2'}><h2 className="text-xl font-bold">Process gaps</h2><div className="mt-5 grid gap-3 sm:grid-cols-3">{[['Overdue follow-ups', metrics.due], ['Open without next action', metrics.awaitingAction], ['Marked quoted', metrics.quoted]].map(([name, count]) => <div key={name as string} className="rounded-xl bg-sky-400/5 p-4"><p className="text-3xl font-black text-sky-200">{count}</p><p className="mt-1 text-xs text-sky-100/50">{name}</p></div>)}</div></section></div>}
+      {view === 'notifications' && <section className={card + ' overflow-hidden'}><div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-6"><div><h2 className="text-xl font-bold">Email delivery</h2><p className="mt-1 text-xs text-sky-100/50">One admin alert per new enquiry, with retry status.</p></div><button disabled={busy} onClick={() => void queueAction('send_pending')} className={button}>Send pending now</button></div><div className="divide-y divide-white/5">{notifications.length ? notifications.map(n => <div key={n.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4"><div><p className="text-sm font-bold">{n.quote?.name || 'Enquiry'} · {n.quote?.service || 'Service'}</p><p className="mt-1 text-xs text-sky-100/45">Created {date(n.created_at)} · {n.attempts} attempts{n.sent_at ? ' · Sent ' + date(n.sent_at) : ''}</p>{n.last_error && <p className="mt-1 text-xs text-red-300">{n.last_error}</p>}</div><div className="flex items-center gap-3"><span className="rounded-full bg-sky-400/10 px-2.5 py-1 text-[10px] font-bold uppercase text-sky-200">{n.status}</span>{['failed','dead'].includes(n.status) && <button disabled={busy} onClick={() => void queueAction('retry', n.id)} className={button}>Retry</button>}</div></div>) : <p className="p-8 text-center text-sm text-sky-100/45">No notifications yet. New submissions appear after the database migration.</p>}</div></section>}
+      <footer className="pb-8 text-center text-xs text-sky-100/30">Robb &amp; Taylor Contracting · Protected operations workspace</footer></main></div>;
 }

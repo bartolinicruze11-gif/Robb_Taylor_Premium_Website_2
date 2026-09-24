@@ -40,6 +40,11 @@ export interface Quote {
   status: QuoteStatus;
   admin_notes: string;
   created_at: string;
+  priority: 'normal' | 'high' | 'urgent';
+  next_action: string;
+  follow_up_at: string | null;
+  last_contacted_at: string | null;
+  updated_at: string;
 }
 
 export interface QuoteInsert {

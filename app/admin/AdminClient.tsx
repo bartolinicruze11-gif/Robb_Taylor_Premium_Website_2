@@ -8,6 +8,7 @@ import { attentionScore, exportQuotes, workspaceMetrics } from '@/lib/admin-inte
 import { Activity, AlertCircle, BarChart3, Bell, CalendarClock, Check, Download, Inbox, LogOut, Mail, Phone, RefreshCw, Search, ShieldCheck } from 'lucide-react';
 
 type View = 'inbox' | 'followups' | 'insights' | 'notifications';
+type Focus = 'all' | 'new' | 'due' | 'no_action' | 'urgent';
 type Event = { id: string; detail: string; created_at: string };
 type Notification = { id: string; status: string; attempts: number; last_error: string | null; sent_at: string | null; created_at: string; quote: { name: string; service: string } | null };
 const stages: QuoteStatus[] = ['new', 'reviewed', 'quoted', 'closed'];
@@ -88,7 +89,7 @@ function Enquiry({ quote, token, onSaved }: { quote: Quote; token: string; onSav
   async function save(contact = false) {
     setBusy(true); setError(''); setSaved('');
     try {
-      const payload = { id: quote.id, status: draft.status, priority: draft.priority, next_action: draft.next_action, follow_up_at: draft.follow_up_at, admin_notes: draft.admin_notes, ...(contact ? { mark_contacted: true } : {}) };
+      const payload = { id: quote.id, expected_updated_at: quote.updated_at, status: draft.status, priority: draft.priority, next_action: draft.next_action, follow_up_at: draft.follow_up_at, admin_notes: draft.admin_notes, ...(contact ? { mark_contacted: true } : {}) };
       const result = await api<{ data: Quote; activity_recorded: boolean }>(token, '/api/admin/quotes', 'PATCH', payload);
       onSaved(result.data); setSaved(result.activity_recorded ? 'Saved and logged' : 'Saved; activity history needs attention');
       try {
@@ -113,6 +114,7 @@ export default function AdminClient() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [view, setView] = useState<View>('inbox');
+  const [focus, setFocus] = useState<Focus>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [stage, setStage] = useState<QuoteStatus | 'all'>('all');
@@ -148,11 +150,15 @@ export default function AdminClient() {
   const filtered = useMemo(() => quotes.filter(q => {
     if (stage !== 'all' && q.status !== stage) return false;
     if (view === 'followups' && (!q.follow_up_at || q.status === 'closed')) return false;
+    if (focus === 'new' && q.status !== 'new') return false;
+    if (focus === 'due' && (q.status === 'closed' || !q.follow_up_at || Date.parse(q.follow_up_at) > Date.now())) return false;
+    if (focus === 'no_action' && (q.status === 'closed' || q.next_action.trim())) return false;
+    if (focus === 'urgent' && q.priority !== 'urgent') return false;
     const term = search.trim().toLowerCase();
     return !term || [q.name,q.company,q.email,q.service,q.location,q.next_action].some(value => value?.toLowerCase().includes(term));
   }).sort((a, b) => view === 'followups'
     ? Date.parse(a.follow_up_at || '9999-12-31') - Date.parse(b.follow_up_at || '9999-12-31')
-    : attentionScore(b) - attentionScore(a) || Date.parse(b.created_at) - Date.parse(a.created_at)), [quotes, stage, search, view]);
+    : attentionScore(b) - attentionScore(a) || Date.parse(b.created_at) - Date.parse(a.created_at)), [quotes, stage, search, view, focus]);
   async function queueAction(action: 'send_pending' | 'retry', id?: string) {
     setBusy(true); setError(''); setMessage('');
     try {
@@ -178,6 +184,9 @@ export default function AdminClient() {
         ['Open pipeline', metrics.open, 'Enquiries, not revenue', Activity],
         ['Last 30 days', metrics.recent, 'Received enquiries', BarChart3],
       ] as const).map(([title, value, note, Icon]) => <div key={title} className={card + ' p-5'}><div className="mb-4 flex items-center justify-between text-sky-200/55"><p className="text-[10px] font-bold uppercase tracking-widest">{title}</p><Icon size={17} /></div><p className="text-4xl font-black tabular-nums">{value}</p><p className="mt-2 text-xs text-sky-100/45">{note}</p></div>)}</div>
+      <section aria-label="Focus queue" className={card + ' flex flex-wrap items-center gap-2 p-4'}><p className="mr-2 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-100/45">Focus queue</p>{([
+        ['all','All',quotes.length], ['new','New',metrics.newLeads], ['due','Due',metrics.due], ['no_action','No next step',metrics.awaitingAction], ['urgent','Urgent',quotes.filter(q => q.priority === 'urgent').length],
+      ] as const).map(([key, title, count]) => <button key={key} onClick={() => { setFocus(key); setStage('all'); setView('inbox'); setSelectedId(null); }} aria-pressed={focus === key} className={'rounded-xl px-3 py-2 text-xs font-bold transition ' + (focus === key ? 'bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30' : 'bg-white/[0.035] text-sky-100/50 hover:text-white')}>{title} <span className="ml-1 tabular-nums opacity-60">{count}</span></button>)}</section>
       <nav aria-label="Workspace" className="flex gap-1 overflow-x-auto border-b border-white/10">{([
         ['inbox','Enquiries',Inbox], ['followups','Follow-ups',CalendarClock], ['insights','Insights',BarChart3], ['notifications','Email delivery',Bell],
       ] as const).map(([key, title, Icon]) => <button key={key} onClick={() => { setView(key); setSelectedId(null); }} className={'flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition ' + (view === key ? 'border-sky-400 text-white' : 'border-transparent text-sky-100/45 hover:text-white')}><Icon size={15} />{title}</button>)}</nav>

@@ -13,11 +13,13 @@ server credentials.
   verification. The legacy endpoint is retired only after migration.
 - Previous saves displayed success without checking the API response. The
   new server validates fields and returns errors. Changes create per-user
-  activity records. Concurrent edits return a conflict rather than silently
-  overwriting a newer record.
+  activity records. Every save sends the version the operator viewed, so
+  concurrent edits return a conflict rather than silently overwriting a newer
+  record.
 - The old dashboard had no follow-up due dates, priority, or delivery history.
   These are stored in the database. Pipeline and service metrics count actual
-  enquiries; a closed stage is not presented as won revenue.
+  enquiries; a closed stage is not presented as won revenue. The focus queue
+  links new, due, unassigned and urgent leads directly to the working inbox.
 - The public form previously fired a best-effort email function from the
   browser. A database trigger now creates a durable, unique admin-alert record
   for each new enquiry. A protected daily worker claims due records, sends

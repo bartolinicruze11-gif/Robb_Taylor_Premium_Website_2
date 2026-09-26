@@ -26,10 +26,11 @@ export async function PATCH(request: Request) {
     const access = await authenticateAdmin(request);
     if (!access) return NextResponse.json({ error: 'Sign in and verify your authenticator' }, { status: 401 });
     const body = await request.json().catch(() => null);
-    if (!body || !isId(body.id)) return NextResponse.json({ error: 'Invalid enquiry' }, { status: 400 });
+    if (!body || !isId(body.id) || typeof body.expected_updated_at !== 'string') return NextResponse.json({ error: 'Invalid enquiry version' }, { status: 400 });
     const { db, actor } = access;
     const { data: before, error: readError } = await db.from('quotes').select('*').eq('id', body.id).maybeSingle();
     if (readError || !before) return NextResponse.json({ error: 'Enquiry not found' }, { status: 404 });
+    if (before.updated_at !== body.expected_updated_at) return NextResponse.json({ error: 'This enquiry changed elsewhere. Refresh before saving.' }, { status: 409 });
     const changes: Record<string, unknown> = {};
     const activity: { quote_id: string; actor_id: string; kind: string; detail: string }[] = [];
     const record = (kind: string, detail: string) => activity.push({ quote_id: body.id, actor_id: actor.id, kind, detail });

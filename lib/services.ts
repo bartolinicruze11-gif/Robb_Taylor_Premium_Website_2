@@ -40,7 +40,7 @@ export const services = [
     slug: 'trenching',
     title: 'Trenching',
     accent: '#c43820',
-    description: 'Precision trenching for utility installation, water mains, and service corridors. Tracked and wheeled machines suited to urban and rural environments.',
+    description: 'Precision trenching and site preparation for service corridors. Tracked and wheeled machines suited to urban and rural environments.',
     capabilities: [
       'Open cut trenching',
       'Bedding and backfill',

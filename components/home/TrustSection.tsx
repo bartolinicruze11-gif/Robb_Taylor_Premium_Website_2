@@ -1,4 +1,5 @@
 'use client';
+import TotikaAccreditation from '@/components/TotikaAccreditation';
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, Clock, Award, MapPin } from 'lucide-react';
@@ -87,6 +88,11 @@ export default function TrustSection() {
             );
           })}
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 pb-16 lg:px-10">
+        <h3 className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Safety Accredited &amp; Industry Members</h3>
+        <TotikaAccreditation businessName="Robb & Taylor Contracting" />
       </div>
 
       <div className="section-line" />

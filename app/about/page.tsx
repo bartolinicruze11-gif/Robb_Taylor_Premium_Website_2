@@ -1,4 +1,5 @@
 'use client';
+import TotikaAccreditation from '@/components/TotikaAccreditation';
 
 import Image from 'next/image';
 
@@ -41,6 +42,7 @@ const values = [
 ];
 
 const certifications = [
+  'Tōtika health and safety prequalification',
   'ConstructSafe Site Safe certification',
   'NZ Transport Agency approved',
   'Confined space entry certified',
@@ -309,6 +311,7 @@ export default function AboutPage() {
                   </motion.li>
                 ))}
               </ul>
+              <TotikaAccreditation businessName="Robb & Taylor Contracting" />
             </motion.div>
 
             <motion.div

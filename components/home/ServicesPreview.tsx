@@ -43,11 +43,11 @@ const services = [
     number: '04',
     title: 'Trenching',
     href: '/services/trenching',
-    description: 'Precision trenching for utility and pipeline installation. Tracked and wheeled machines suited to any site and ground condition.',
+    description: 'Precision trenching and site preparation for service corridors. Tracked and wheeled machines suited to varied sites and ground conditions.',
     accent: '#b83820',
     image: projectImages.trenchingSite,
     imageAlt: 'Trenching contractors Wellington — internal concrete trenching works',
-    tag: 'Utility & Pipeline',
+    tag: 'Precision Trenching',
   },
 ];
 
@@ -156,7 +156,7 @@ export default function ServicesPreview() {
       <div className="border-t border-white/[0.05]">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <p className="text-[#3a5060] text-sm">
-            All services delivered with an environmentally focused approach and to Wellington Water specification.
+            Civil works planned around site conditions, programme requirements and project specifications.
           </p>
           <Link
             href="/contact"

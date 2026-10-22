@@ -85,11 +85,18 @@ export default function ContactFormWizard() {
         setLoading(false);
         return;
       }
-      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}` },
-        body: JSON.stringify(data),
-      }).catch(() => {});
+      // The quote is already persisted. Report notification failure without losing the lead.
+      try {
+        const notification = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}` },
+          body: JSON.stringify(data),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!notification.ok) console.error('Quote notification failed:', notification.status);
+      } catch (notificationError) {
+        console.error('Quote saved, but notification attempt failed:', notificationError);
+      }
       trackEvent('generate_lead', { form_id: 'contact_quote' });
       router.push('/contact/thank-you');
     } catch {

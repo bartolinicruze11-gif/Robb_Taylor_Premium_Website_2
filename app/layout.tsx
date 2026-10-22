@@ -19,24 +19,24 @@ export const metadata: Metadata = {
     template: '%s | Robb & Taylor Contracting',
   },
   description:
-    "Wellington's #1 civil contractors. Robb & Taylor Contracting specialise in civil construction, water infrastructure, drainage, earthworks, trenching and pipe installation across Wellington, Lower Hutt, Upper Hutt, Porirua and Kapiti. Free quotes — response within 1 business day.",
+    "Robb & Taylor Contracting specialise in civil construction, earthworks, pavements, retaining and piling, and trenching across Wellington, Lower Hutt, Upper Hutt, Porirua and Kapiti.",
   keywords: [
     'civil contractors Wellington',
     'civil construction Wellington',
     'civil construction company Wellington NZ',
-    'water infrastructure Wellington',
-    'water main installation Wellington',
-    'drainage contractors Wellington',
-    'stormwater drainage Wellington',
+    'retaining walls Wellington',
+    'civil site preparation Wellington',
+    'retaining contractors Wellington',
+    'pavement construction Wellington',
     'earthworks contractors Wellington',
     'bulk earthworks Wellington',
-    'pipe installation Wellington',
-    'pipeline installation Wellington',
+    'piling contractors Wellington',
+    'earthmoving contractors Wellington',
     'trenching contractors Wellington',
     'site preparation Wellington',
     'civil engineering contractors Wellington NZ',
     'infrastructure contractors Wellington',
-    'Wellington Water approved contractors',
+    'civil trenching contractors Wellington',
     'civil works Lower Hutt',
     'civil works Upper Hutt',
     'civil works Porirua',
@@ -58,20 +58,20 @@ export const metadata: Metadata = {
     siteName: 'Robb & Taylor Contracting',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
     description:
-      "Wellington's specialist civil contractors. Water infrastructure, drainage, earthworks, trenching and civil construction — NZS 4404 certified, council-approved, serving the Wellington Region.",
+      "Wellington's specialist civil contractors. Earthworks, retaining and piling, pavements, trenching and civil construction across the Wellington region, serving the Wellington Region.",
     images: [
       {
         url: '/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg',
         width: 1200,
         height: 630,
-        alt: 'Robb & Taylor Contracting — Civil Contractors Wellington — HDPE pipe installation',
+        alt: 'Robb & Taylor Contracting — Civil Contractors Wellington — civil construction site work',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description: "Wellington's specialist civil contractors — water infrastructure, drainage, earthworks and more. NZS 4404 certified, council-approved.",
+    description: "Wellington's specialist civil contractors — earthworks, retaining and piling, pavements and trenching.",
     images: ['/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg'],
   },
   robots: {
@@ -97,7 +97,7 @@ const localBusinessSchema = {
   name: 'Robb & Taylor Contracting Ltd',
   legalName: 'Robb & Taylor Contracting Ltd',
   description:
-    'Specialist civil contractors in the Wellington Region providing civil construction, water infrastructure, drainage, earthworks, trenching and pipe installation. NZS 4404 certified and Wellington Water approved.',
+    'Civil contractors in the Wellington Region providing civil construction, earthworks, pavements, retaining and piling, and trenching.',
   url: BASE_URL,
   telephone: '+64-21-027-4447',
   email: 'Rene@RobbTaylor.co.nz',
@@ -129,7 +129,7 @@ const localBusinessSchema = {
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Civil Construction Wellington', description: 'Full-scope civil construction including roading, kerb and channel, retaining structures and utilities in Wellington.', url: `${BASE_URL}/services/civil-construction` } },
 
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Earthworks Wellington', description: 'Bulk earthworks, cut and fill, compaction and subgrade preparation for Wellington subdivisions.', url: `${BASE_URL}/services/earthworks` } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Trenching Wellington', description: 'Precision trenching for utility and pipeline installation across Wellington Region.', url: `${BASE_URL}/services/trenching` } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Trenching Wellington', description: 'Precision trenching and site preparation for service corridors across Wellington Region.', url: `${BASE_URL}/services/trenching` } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Retaining & Piling Works Wellington', description: 'Retaining walls and piling for residential, commercial and infrastructure projects.', url: `${BASE_URL}/services/retaining-piling` } },
     ],
   },
@@ -150,12 +150,12 @@ const localBusinessSchema = {
     'Civil Construction',
 
     'Earthworks',
-    'Pipeline Installation',
-    'NZS 4404',
-    'Wellington Water',
+    'Retaining & Piling',
+    'Earthworks',
+    'Pavement Preparation',
     'ConstructSafe',
   ],
-  award: ['ConstructSafe Accredited', 'NZS 4404 Certified', 'Site Safe Gold Member'],
+  award: ['ConstructSafe Accredited', 'Site Safe Gold Member'],
 };
 
 const organizationSchema = {
@@ -186,7 +186,7 @@ const webSiteSchema = {
   '@id': `${BASE_URL}/#website`,
   url: BASE_URL,
   name: 'Robb & Taylor Contracting — Civil Contractors Wellington',
-  description: 'Wellington Region civil contractors specialising in water infrastructure, drainage, earthworks and civil construction.',
+  description: 'Wellington Region civil contractors specialising in earthworks, pavements, retaining and piling, trenching and civil construction.',
   publisher: { '@id': `${BASE_URL}/#organization` },
 };
 

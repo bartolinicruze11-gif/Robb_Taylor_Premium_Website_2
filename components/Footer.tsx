@@ -89,9 +89,11 @@ export default function Footer() {
           <p className="text-[#2d4455] text-[11px] font-medium tracking-[0.12em] uppercase" suppressHydrationWarning>
             © {new Date().getFullYear()} Robb &amp; Taylor Contracting Ltd. All rights reserved.
           </p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link href="/privacy" className="text-[#2d4455] hover:text-[#5a7a8e] text-[11px] tracking-[0.1em] uppercase transition-colors">Privacy</Link>
             <Link href="/terms" className="text-[#2d4455] hover:text-[#5a7a8e] text-[11px] tracking-[0.1em] uppercase transition-colors">Terms</Link>
+            <Link href="/cookies" className="text-white/70 hover:text-white text-[11px] uppercase">Cookies</Link>
+            <Link href="/safety" className="text-white/70 hover:text-white text-[11px] uppercase">Health &amp; Safety</Link>
             <span className="text-[#1e2f3a] text-[11px] font-semibold tracking-[0.15em] uppercase">Lower North Island, NZ</span>
           </div>
         </div>

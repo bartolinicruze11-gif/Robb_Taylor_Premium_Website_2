@@ -1,3 +1,4 @@
+import { readCookiePreferences } from '@/lib/consent';
 export const GA_MEASUREMENT_ID = 'G-RHLENS2SJT';
 
 export type TrackedEvent = 'generate_lead' | 'phone_click' | 'email_click';
@@ -6,7 +7,7 @@ type EventDetails = { form_id?: 'homepage_quote' | 'contact_quote' };
 export function trackEvent(name: TrackedEvent, details: EventDetails = {}) {
   if (typeof window === 'undefined' || window.location.pathname.startsWith('/admin')) return;
   try {
-    if (localStorage.getItem('rt_cookie_consent') !== 'accepted') return;
+    if (!readCookiePreferences()?.analytics) return;
     const tags = window as unknown as { gtag?: (...args: unknown[]) => void };
     // Only fixed event labels are sent. Never include enquiry fields or link queries.
     tags.gtag?.('event', name, {

@@ -1,4 +1,5 @@
 'use client';
+import EnquiryPrivacyNotice from '@/components/EnquiryPrivacyNotice';
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,8 +9,7 @@ import { trackEvent } from '@/lib/analytics';
 import { supabase } from '@/lib/supabase';
 
 const serviceOptions = [
-  'Civil Construction', 'Water Infrastructure', 'Drainage',
-  'Earthworks', 'Trenching', 'Pipe Installation', 'Site Preparation', 'Other / Multiple Services',
+  'Civil Construction', 'Earthworks & Pavements', 'Retaining & Piling', 'Trenching',
 ];
 
 const locationOptions = [
@@ -252,6 +252,7 @@ export default function ContactCTA() {
                   />
                 </div>
 
+                <EnquiryPrivacyNotice />
                 <button
                   type="submit"
                   disabled={loading}

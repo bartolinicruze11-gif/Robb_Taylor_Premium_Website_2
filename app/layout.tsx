@@ -1,3 +1,4 @@
+import ConsentTracking from '@/components/ConsentTracking';
 import { TOTIKA_CERTIFICATION } from '@/lib/totika';
 import './globals.css';
 import type { Metadata } from 'next';
@@ -7,9 +8,7 @@ import Footer from '@/components/Footer';
 import SmoothScrollProvider from '@/components/SmoothScrollProvider';
 import ScrollProgress from '@/components/ScrollProgress';
 import ConversionTracking from '@/components/ConversionTracking';
-import GoogleAnalytics from '@/components/GoogleAnalytics';
 import CookieConsent from '@/components/CookieConsent';
-import { Analytics } from '@vercel/analytics/next';
 
 const BASE_URL = 'https://www.robbtaylor.co.nz';
 
@@ -194,26 +193,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-NZ">
       <head>
-        <script id="google-consent-default" dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
-          gtag('consent', 'default', {
-            analytics_storage: 'denied', ad_storage: 'denied',
-            ad_user_data: 'denied', ad_personalization: 'denied'
-          });
-          try {
-            if (localStorage.getItem('rt_cookie_consent') === 'accepted') {
-              gtag('consent', 'update', { analytics_storage: 'granted' });
-            }
-          } catch (_) {}
-        ` }} />
-        <script id="google-tag-manager" dangerouslySetInnerHTML={{ __html: `
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-N577RRB3');
-        ` }} />
         <meta name="geo.region" content="NZ-WGN" />
         <meta name="geo.placename" content="Wellington, New Zealand" />
         <meta name="geo.position" content="-41.2865;174.7762" />
@@ -238,11 +217,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-[#020c18] text-white antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-        <noscript>
-          <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N577RRB3"
-            height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}
-            title="Google Tag Manager" />
-        </noscript>
         <ScrollProgress />
         <SmoothScrollProvider>
           <Nav />
@@ -250,9 +224,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <CookieConsent />
         </SmoothScrollProvider>
-        <GoogleAnalytics />
+        <ConsentTracking />
         <ConversionTracking />
-        <Analytics />
       </body>
     </html>
   );

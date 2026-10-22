@@ -1,110 +1,30 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+ 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
-
-const STORAGE_KEY = 'rt_cookie_consent';
-
-type ConsentState = 'accepted' | 'declined' | null;
-
+import { readCookiePreferences, saveCookiePreferences } from '@/lib/consent';
 export default function CookieConsent() {
-  const [visible, setVisible] = useState(false);
-  const [consent, setConsent] = useState<ConsentState>(null);
+ const [visible,setVisible]=useState(false);
+ const [analytics,setAnalytics]=useState(false);
+ const [advertising,setAdvertising]=useState(false);
+ useEffect(()=>{const p=readCookiePreferences();setAnalytics(p?.analytics??false);setAdvertising(p?.advertising??false);setVisible(!p);},[]);
+ function open(){const p=readCookiePreferences();setAnalytics(p?.analytics??false);setAdvertising(p?.advertising??false);setVisible(true);}
+ function save(a:boolean,d:boolean){saveCookiePreferences(a,d);setVisible(false);}
+ return <>
+  {!visible && <button type="button" onClick={open} className="fixed bottom-3 left-3 z-[190] rounded-lg border border-white/25 bg-[#07111c] px-3 py-2 text-xs text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">Cookie settings</button>}
+  {visible && <div role="dialog" aria-label="Cookie settings" aria-describedby="cookie-description" className="fixed bottom-4 left-4 right-4 z-[200] max-h-[85vh] overflow-y-auto rounded-xl border border-white/20 bg-[#07111c] p-5 text-white shadow-2xl sm:left-auto sm:right-5 sm:w-[420px]">
+   <div className="mb-3 flex items-center justify-between gap-3"><h2 className="text-base font-bold">Your cookie choices</h2><button type="button" onClick={()=>save(false,false)} className="rounded px-3 py-2 text-sm text-white/80 underline" aria-label="Close and use essential only">Close</button></div>
+   <p id="cookie-description" className="text-sm leading-relaxed text-white/80">Essential services keep the site and enquiry forms working. Optional measurement stays off until you choose it. You can change your choice at any time.</p>
+   <Link href="/cookies" className="mt-3 inline-block text-sm text-white underline underline-offset-4">Read the Cookie Policy</Link>
+   <div className="my-4 space-y-3 text-sm">
+    <p className="text-white/70">Essential services: always on</p>
+    <label className="flex cursor-pointer items-start gap-3"><input type="checkbox" checked={analytics} onChange={e=>setAnalytics(e.target.checked)} className="mt-1 h-4 w-4 shrink-0" /><span>Analytics <span className="block text-xs leading-relaxed text-white/65">Understand visits and enquiry interactions.</span></span></label>
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) as ConsentState;
-      if (!stored) {
-        // Small delay so it doesn't flash immediately on load
-        const t = setTimeout(() => setVisible(true), 1200);
-        return () => clearTimeout(t);
-      }
-    } catch {
-      // localStorage unavailable
-    }
-  }, []);
-
-  const accept = () => {
-    try { localStorage.setItem(STORAGE_KEY, 'accepted'); } catch { /* noop */ }
-    window.dispatchEvent(new CustomEvent('rt:cookie-consent', { detail: 'accepted' }));
-    setConsent('accepted');
-    setVisible(false);
-  };
-
-  const decline = () => {
-    try { localStorage.setItem(STORAGE_KEY, 'declined'); } catch { /* noop */ }
-    window.dispatchEvent(new CustomEvent('rt:cookie-consent', { detail: 'declined' }));
-    setConsent('declined');
-    setVisible(false);
-  };
-
-  return (
-    <>
-      {!visible && (
-        <button type="button" onClick={() => setVisible(true)}
-          className="fixed bottom-3 left-3 z-[190] rounded border border-white/15 bg-[#040f1e] px-3 py-2 text-xs text-[#94b0c8] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400">
-          Cookie settings
-        </button>
-      )}
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          role="dialog"
-          aria-label="Cookie consent"
-          aria-live="polite"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[200]"
-        >
-          <div className="bg-[#040f1e] border border-white/[0.09] shadow-2xl p-5 relative">
-            {/* Top accent */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-blue-500/60 via-blue-400/30 to-transparent" />
-
-            <button
-              onClick={decline}
-              aria-label="Dismiss cookie notice"
-              className="absolute top-3.5 right-3.5 text-[#4a6478] hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-start gap-3 mb-4 pr-5">
-              <div className="w-7 h-7 flex-shrink-0 bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mt-0.5">
-                <span className="text-blue-400 text-[11px] font-bold">C</span>
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm mb-1">Cookie Notice</p>
-                <p className="text-[#5a7a8e] text-xs leading-relaxed">
-                  With your permission, we use analytics cookies to understand visits and enquiries. You can change your choice using Cookie settings.{' '}
-                  <Link href="/privacy#cookies" className="text-blue-400 hover:text-blue-300 transition-colors underline underline-offset-2">
-                    Learn more
-                  </Link>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5">
-              <button
-                onClick={accept}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold uppercase tracking-[0.14em] py-2.5 transition-colors duration-150"
-              >
-                Accept analytics
-              </button>
-              <button
-                onClick={decline}
-                className="flex-1 border border-white/[0.1] hover:border-white/[0.2] text-[#7a95ae] hover:text-white text-[11px] font-bold uppercase tracking-[0.14em] py-2.5 transition-all duration-150"
-              >
-                Decline
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-    </>
-  );
+   </div>
+   <div className="grid grid-cols-2 gap-2 text-sm font-semibold">
+    <button type="button" onClick={()=>save(false,false)} className="min-h-[44px] rounded border border-white/30 px-3 py-2 hover:bg-white/10">Essential only</button>
+    <button type="button" onClick={()=>save(true,false)} className="min-h-[44px] rounded border border-white/30 px-3 py-2 hover:bg-white/10">Allow all optional</button>
+    <button type="button" onClick={()=>save(analytics,advertising)} className="col-span-2 min-h-[44px] rounded bg-white px-3 py-2 text-[#07111c] hover:bg-white/90">Save choices</button>
+   </div>
+  </div>}
+ </>;
 }

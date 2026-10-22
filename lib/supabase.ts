@@ -12,7 +12,7 @@ function getClient(): SupabaseClient {
     throw new Error('Supabase environment variables are not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
   }
 
-  _client = createClient(url, key);
+  _client = createClient(url, key, { auth: { storage: typeof window === 'undefined' ? undefined : window.sessionStorage } });
   return _client;
 }
 

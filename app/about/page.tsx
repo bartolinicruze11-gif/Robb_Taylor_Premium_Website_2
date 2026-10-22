@@ -251,8 +251,8 @@ export default function AboutPage() {
         <div className="grid grid-cols-2 lg:grid-cols-3">
           {[
             { src: '/images/Screenshot_2026-06-18_073355.png',           alt: 'Pipe laying and trenching site works',       label: 'Trenching' },
-            { src: '/images/Screenshot_2026-05-26_104638.png',           alt: 'Concrete pipe installation works',           label: 'Pipe Installation' },
-            { src: "/images/Screenshot_2026-05-27_091929 copy.png",      alt: 'Indoor piling with excavator',               label: 'Retaining & Piling' },
+            { src: '/images/Screenshot_2026-05-26_104638.png',           alt: 'Civil construction site works',           label: 'Civil Construction' },
+            { src: "/images/Screenshot_2026-05-27_091929.png",      alt: 'Indoor piling with excavator',               label: 'Retaining & Piling' },
           ].map((img, i) => (
             <motion.div
               key={img.label}
@@ -389,3 +389,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

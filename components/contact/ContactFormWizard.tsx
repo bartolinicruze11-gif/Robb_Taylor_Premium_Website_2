@@ -9,7 +9,7 @@ import {
   ChevronRight, ChevronLeft, MapPin, User, Mail, Phone,
 } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
-import { supabase } from '@/lib/supabase';
+
 
 const serviceOptions = [
   { value: 'Civil Construction', label: 'Civil Construction', sub: 'Roading, kerb & channel, structures', icon: Building2, accent: '#2281f5' },
@@ -78,25 +78,9 @@ export default function ContactFormWizard() {
     setError(null);
     try {
       const data = { name: sel.name.trim(), company: sel.company || '', email: sel.email.trim().toLowerCase(), phone: sel.phone || '', service: sel.service, location: sel.location, budget: '', timeline: '', message: sel.message || '' };
-      const { error: dbError } = await supabase.from('quotes').insert(data);
-      if (dbError) {
-        setError('Something went wrong saving your request. Please try again or call us directly.');
-        submitting.current = false;
-        setLoading(false);
-        return;
-      }
-      // The quote is already persisted. Report notification failure without losing the lead.
-      try {
-        const notification = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}` },
-          body: JSON.stringify(data),
-          signal: AbortSignal.timeout(8000),
-        });
-        if (!notification.ok) console.error('Quote notification failed:', notification.status);
-      } catch (notificationError) {
-        console.error('Quote saved, but notification attempt failed:', notificationError);
-      }
+      const response = await fetch('/api/submit-quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error('Submission failed');
       trackEvent('generate_lead', { form_id: 'contact_quote' });
       router.push('/contact/thank-you');
     } catch {
@@ -239,3 +223,4 @@ export default function ContactFormWizard() {
     </form>
   );
 }
+

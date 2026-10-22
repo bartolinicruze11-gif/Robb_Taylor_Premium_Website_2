@@ -1,8 +1,8 @@
 // ─── Images confirmed non-zero bytes ────────────────────────────────────────
 const R = {
   trench:   '/images/097886d0-5afa-4463-8890-4489f97ef67a.JPG',   // outdoor trench/excavation
-  pipes:    '/images/9de9d513-358e-45b5-b3b7-adce54ecac41.JPG',   // pipe installation
-  tanks:    '/images/954c3c9e-1422-440c-a287-cf70157668a7.JPG',   // tanks / water infrastructure
+  pipes:    '/images/9de9d513-358e-45b5-b3b7-adce54ecac41.JPG',   // civil site photo
+  tanks:    '/images/954c3c9e-1422-440c-a287-cf70157668a7.JPG',   // tanks on a civil project site
 
   // WhatsApp on-site photos (visually confirmed good)
   wa04_2:  '/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(2).jpeg', // site works
@@ -32,7 +32,7 @@ const R = {
   civilConst1: '/images/Screenshot_2026-05-26_104638.png',
   civilConst2: '/images/Screenshot_2026-06-18_073355.png',
   civilConst3: '/images/Screenshot_2026-05-26_104638.png',
-  civilConst4: "/images/Screenshot_2026-05-27_091929 copy.png",
+  civilConst4: "/images/Screenshot_2026-05-27_091929.png",
   civilConst5: "/images/Screenshot_2026-05-27_091929.png",
   civilConst7: "/images/Screenshot_2026-05-27_091422.png",
 
@@ -119,9 +119,9 @@ export const servicePhotos: Record<string, ProjectPhoto[]> = {
     { src: R.trench_t2, caption: 'Trench Works On Site',              category: 'Trenching' },
   ],
   'pipe-installation': [
-    { src: R.pipes,    caption: 'Pipe Installation Works',           category: 'Pipe Installation' },
-    { src: R.trench,   caption: 'Pipe Trench Excavation',            category: 'Pipe Installation' },
-    { src: R.wa04_5,   caption: 'Site Pipe Works',                   category: 'Pipe Installation' },
+    { src: R.pipes,    caption: 'Civil Construction Site Works',           category: 'Civil Construction' },
+    { src: R.trench,   caption: 'Trench Excavation',            category: 'Civil Construction' },
+    { src: R.wa04_5,   caption: 'Site Pipe Works',                   category: 'Civil Construction' },
   ],
   'retaining-piling': [
     { src: R.retWall1,    caption: 'Concrete Retaining Wall Construction', category: 'Retaining & Piling' },

@@ -28,10 +28,8 @@ const AUTOPLAY_MS = 4000;
 const accentColors: Record<string, string> = {
   'Civil Construction':    '#2281f5',
   'Trenching':             '#c43820',
-  'Water Infrastructure':  '#1a9fd4',
   'Drainage':              '#1ab8c8',
   'Earthworks':            '#e8882a',
-  'Pipe Installation':     '#1ab8c8',
   'Site Preparation':      '#e8882a',
   'Retaining & Piling':    '#c87820',
 };
@@ -360,3 +358,4 @@ export default function ProjectSlideshow({
     </section>
   );
 }
+

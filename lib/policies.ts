@@ -57,7 +57,7 @@ export const policies = {
         "id": "providers",
         "title": "Technology providers and overseas processing",
         "paragraphs": [
-          "The website is hosted on Vercel. Enquiry data and associated functions use the existing Bolt-managed database platform through Supabase-compatible services. Email delivery uses the configured notification provider; Resend is used by the email integration. Google provides optional analytics and, where described in our Cookie Policy, advertising measurement. Google Fonts also receives network requests when fonts are fetched.",
+          "The website is hosted on Vercel. Enquiry data and associated functions use the existing Bolt-managed database platform through Supabase-compatible services. Email delivery is handled by the website’s configured notification service and the recipients’ email providers. Google provides optional analytics and, where described in our Cookie Policy, advertising measurement. Google Fonts also receives network requests when fonts are fetched.",
           "Our providers and their subprocessors may process information outside New Zealand. We remain responsible for information handled by a provider solely as our agent. Where a transfer is a disclosure to an overseas recipient in its own right, we must have an applicable lawful basis and the safeguards required by information privacy principle 12. Website use alone is not blanket permission to waive those safeguards. Contact us for information about the providers relevant to your enquiry."
         ]
       },

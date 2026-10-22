@@ -20,7 +20,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     { url: `${SITE_URL}/contact`, lastModified: metadataUpdated, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE_URL}/about`, lastModified: metadataUpdated, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${SITE_URL}/privacy`, lastModified: metadataUpdated, changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${SITE_URL}/terms`, lastModified: metadataUpdated, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/privacy`, lastModified: '2026-10-22', changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/terms`, lastModified: '2026-10-22', changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/cookies`, lastModified: '2026-10-22', changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/safety`, lastModified: '2026-10-22', changeFrequency: 'yearly', priority: 0.3 },
   ];
 }
+

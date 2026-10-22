@@ -1,4 +1,5 @@
 'use client';
+import EnquiryPrivacyNotice from '@/components/EnquiryPrivacyNotice';
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -207,6 +208,7 @@ export default function ContactFormWizard() {
         </AnimatePresence>
       </div>
 
+      {step === 2 && <EnquiryPrivacyNotice />}
       <div className="flex items-center justify-between mt-7 pt-6 border-t border-white/[0.06]">
         {step > 0 ? (
           <button type="button" onClick={back} className="flex items-center gap-1.5 text-[#5a7a8e] hover:text-white text-sm font-semibold transition-colors">

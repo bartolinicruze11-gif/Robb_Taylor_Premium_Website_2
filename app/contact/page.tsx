@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://www.robbtaylor.co.nz/contact' },
   openGraph: {
     title: "Free Quote — Wellington's Trusted Civil Contractors | Robb & Taylor",
-    description: 'Takes 60 seconds. Free, no-obligation quotes for civil contracting in Wellington. Water mains, drainage, earthworks, retaining & piling, and civil construction.',
+    description: 'Takes 60 seconds. Free, no-obligation quotes for civil contracting in Wellington. Earthworks, pavements, retaining & piling, trenching, and civil construction.',
     url: 'https://www.robbtaylor.co.nz/contact',
     type: 'website',
   },

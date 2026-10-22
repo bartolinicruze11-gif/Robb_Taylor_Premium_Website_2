@@ -44,7 +44,7 @@ const faqSchema = {
       name: 'How do I get a civil contracting quote in Wellington?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'You can request a free quote by visiting our contact page at robbtaylor.co.nz/contact, calling +64 21 027 4447, or emailing Rene@RobbTaylor.co.nz. We typically respond within 1 business day.',
+        text: 'You can request a free quote by visiting our contact page at robbtaylor.co.nz/contact, calling 021 0274 2447, or emailing Rene@RobbTaylor.co.nz. We typically respond within 1 business day.',
       },
     },
     {

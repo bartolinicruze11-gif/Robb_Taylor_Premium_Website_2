@@ -21,7 +21,7 @@ export function trackEvent(name: TrackedEvent, details: EventDetails = {}) {
 
 export function trackedLinkEvent(href: string): TrackedEvent | null {
   if (href.toLowerCase().startsWith('tel:')) {
-    return href.slice(4).replace(/[^\d+]/g, '') === '+64210274447' ? 'phone_click' : null;
+    return href.slice(4).replace(/[^\d+]/g, '') === '+642102742447' ? 'phone_click' : null;
   }
   if (href.toLowerCase().startsWith('mailto:')) {
     return href.slice(7).split('?')[0].toLowerCase() === 'rene@robbtaylor.co.nz' ? 'email_click' : null;

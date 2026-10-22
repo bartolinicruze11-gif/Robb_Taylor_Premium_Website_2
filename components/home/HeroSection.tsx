@@ -234,11 +234,11 @@ export default function HeroSection() {
           </Link>
 
           <a
-            href="tel:+64210274447"
+            href="tel:+642102742447"
             className="flex items-center gap-2.5 text-[#56718a] hover:text-[#94b0c8] text-[11px] font-semibold tracking-wider px-4 py-4 transition-colors duration-200"
           >
             <Phone className="w-3.5 h-3.5" />
-            +64 21 027 4447
+            021 0274 2447
           </a>
         </motion.div>
       </motion.div>

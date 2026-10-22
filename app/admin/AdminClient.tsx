@@ -1,4 +1,5 @@
 'use client';
+import EmailAlerts from '@/components/admin/EmailAlerts';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Quote, QuoteStatus } from '@/lib/supabase';
@@ -548,11 +549,11 @@ export default function AdminClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#02101f] text-white relative">
+    <div className="min-h-screen bg-[#02101f] pt-24 text-white relative lg:pt-40">
       <div className="fixed inset-x-0 top-0 h-[500px] bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.10)_0%,transparent_65%)] pointer-events-none" />
       <div className="fixed inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)] [background-size:56px_56px] pointer-events-none" />
 
-      <header className="sticky top-0 z-40 bg-[#02101f]/85 backdrop-blur-xl border-b border-sky-400/10">
+      <header className="sticky top-24 z-40 bg-[#02101f]/85 lg:top-40 backdrop-blur-xl border-b border-sky-400/10">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-9 h-9 flex-shrink-0">
@@ -609,6 +610,7 @@ export default function AdminClient() {
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 relative">
         {!selected && (
           <>
+            <EmailAlerts password={enteredPassword} />
             <div className="mb-6 flex items-end justify-between flex-wrap gap-4">
               <div>
                 <p className="text-sky-300/50 text-[10px] uppercase tracking-[0.3em] font-bold mb-1.5">Dashboard</p>
@@ -829,3 +831,4 @@ export default function AdminClient() {
     </div>
   );
 }
+

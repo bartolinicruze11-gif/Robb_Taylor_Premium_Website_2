@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Phone, MapPin, ArrowRight, Mail, ShieldCheck, CircleAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { trackEvent } from '@/lib/analytics';
-import { supabase } from '@/lib/supabase';
 
 const serviceOptions = [
   'Civil Construction', 'Earthworks & Pavements', 'Retaining & Piling', 'Trenching',
@@ -54,23 +53,9 @@ export default function ContactCTA() {
         message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
       };
 
-      const { error: dbError } = await supabase.from('quotes').insert(data);
-
-      if (dbError) {
-        setError('Something went wrong. Please try again or call us directly.');
-        submitting.current = false;
-        setLoading(false);
-        return;
-      }
-
-      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-quote-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify(data),
-      }).catch(() => {});
+      const response = await fetch('/api/submit-quote', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      const result = await response.json();
+      if (!response.ok || result.success !== true) throw new Error(result.error || 'Unable to submit your enquiry.');
 
       trackEvent('generate_lead', { form_id: 'homepage_quote' });
 

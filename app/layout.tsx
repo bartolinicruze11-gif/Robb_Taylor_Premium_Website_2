@@ -99,7 +99,7 @@ const localBusinessSchema = {
   description:
     'Specialist civil contractors in the Wellington Region providing civil construction, water infrastructure, drainage, earthworks, trenching and pipe installation. NZS 4404 certified and Wellington Water approved.',
   url: BASE_URL,
-  telephone: '+64-21-027-4447',
+  telephone: '+64-21-0274-2447',
   email: 'Rene@RobbTaylor.co.nz',
   address: {
     '@type': 'PostalAddress',
@@ -172,7 +172,7 @@ const organizationSchema = {
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+64-21-027-4447',
+    telephone: '+64-21-0274-2447',
     contactType: 'customer service',
     areaServed: 'NZ',
     availableLanguage: 'English',

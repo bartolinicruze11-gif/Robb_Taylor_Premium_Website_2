@@ -151,11 +151,11 @@ export default function Nav() {
               <div className="w-px h-4 bg-white/[0.08] mx-4" />
 
               <a
-                href="tel:+64210274447"
+                href="tel:+642102742447"
                 className="flex items-center gap-2 text-[#7a95ae] hover:text-white text-[11px] font-bold uppercase tracking-[0.15em] transition-colors px-4 py-2"
               >
                 <Phone className="w-3 h-3" />
-                +64 21 027 4447
+                021 0274 2447
               </a>
 
               <Link
@@ -239,11 +239,11 @@ export default function Nav() {
 
               <div className="flex flex-col gap-3 pt-5">
                 <a
-                  href="tel:+64210274447"
+                  href="tel:+642102742447"
                   className="flex items-center justify-center gap-2 border border-white/[0.08] text-white text-sm font-bold tracking-widest uppercase py-3.5"
                 >
                   <Phone className="w-4 h-4 text-blue-500" />
-                  +64 21 027 4447
+                  021 0274 2447
                 </a>
                 <Link
                   href="/contact"

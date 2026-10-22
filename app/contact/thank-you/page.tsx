@@ -22,7 +22,7 @@ export default function ThankYouPage() {
         </h1>
         <p className="text-[#6a8598] text-base leading-relaxed mb-8">
           Our team will review your enquiry and get back to you. If your project is urgent, call{' '}
-          <a href="tel:+64210274447" className="text-blue-400 hover:text-blue-300">+64 21 027 4447</a>.
+          <a href="tel:+642102742447" className="text-blue-400 hover:text-blue-300">021 0274 2447</a>.
         </p>
         <Link href="/" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-7 py-4 text-[11px] tracking-[0.18em] uppercase transition-colors">
           Back to Home <ArrowRight aria-hidden="true" className="w-4 h-4" />

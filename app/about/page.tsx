@@ -91,8 +91,8 @@ export default function AboutPage() {
                 We started with a clear focus: deliver quality civil work on time and on spec, every time. That commitment has built us a strong reputation for reliable delivery on technically demanding infrastructure projects across the Wellington Region.
               </p>
               <div className="flex flex-col gap-2">
-                <a href="tel:+64210274447" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
-                  +64 21 027 4447
+                <a href="tel:+642102742447" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
+                  021 0274 2447
                 </a>
                 <a href="mailto:Rene@RobbTaylor.co.nz" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
                   Rene@RobbTaylor.co.nz
@@ -155,7 +155,7 @@ export default function AboutPage() {
                 <p className="text-white font-bold text-base leading-tight">Rene Robb</p>
                 <p className="text-blue-400 text-[11px] font-semibold tracking-[0.18em] uppercase mt-1">Founder &amp; Director</p>
                 <div className="mt-3 flex flex-col gap-1.5">
-                  <a href="tel:+64210274447" className="text-[#5a7a8e] hover:text-blue-400 text-xs font-medium transition-colors">+64 21 027 4447</a>
+                  <a href="tel:+642102742447" className="text-[#5a7a8e] hover:text-blue-400 text-xs font-medium transition-colors">021 0274 2447</a>
                   <a href="mailto:Rene@RobbTaylor.co.nz" className="text-[#5a7a8e] hover:text-blue-400 text-xs font-medium transition-colors">Rene@RobbTaylor.co.nz</a>
                 </div>
               </div>
@@ -334,8 +334,8 @@ export default function AboutPage() {
                 <p className="text-white font-semibold text-sm mb-1">Ready to discuss your project?</p>
                 <p className="text-[#5a7a8e] text-sm mb-4 leading-relaxed">Get in touch with Rene directly.</p>
                 <div className="flex flex-col gap-2">
-                  <a href="tel:+64210274447" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
-                    +64 21 027 4447
+                  <a href="tel:+642102742447" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
+                    021 0274 2447
                   </a>
                   <a href="mailto:Rene@RobbTaylor.co.nz" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
                     Rene@RobbTaylor.co.nz

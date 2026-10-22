@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import ContactFormWizard from './ContactFormWizard';
 
 const contactCards = [
-  { icon: Phone, label: 'Phone', value: '+64 21 027 4447', href: 'tel:+64210274447' },
+  { icon: Phone, label: 'Phone', value: '021 0274 2447', href: 'tel:+642102742447' },
   { icon: Mail, label: 'Email', value: 'Rene@RobbTaylor.co.nz', href: 'mailto:Rene@RobbTaylor.co.nz' },
   { icon: MapPin, label: 'Service Area', value: 'Lower North Island, New Zealand', href: null },
   { icon: Clock, label: 'Response Time', value: 'Same day — usually within hours', href: null },

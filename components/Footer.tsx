@@ -37,9 +37,9 @@ export default function Footer() {
             </p>
 
             <div className="flex flex-col gap-3">
-              <a href="tel:+64210274447" className="flex items-center gap-3 text-[#5a7a8e] hover:text-blue-400 transition-colors text-sm group">
+              <a href="tel:+642102742447" className="flex items-center gap-3 text-[#5a7a8e] hover:text-blue-400 transition-colors text-sm group">
                 <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                +64 21 027 4447
+                021 0274 2447
               </a>
               <a href="mailto:Rene@RobbTaylor.co.nz" className="flex items-center gap-3 text-[#5a7a8e] hover:text-blue-400 transition-colors text-sm group">
                 <Mail className="w-3.5 h-3.5 flex-shrink-0" />

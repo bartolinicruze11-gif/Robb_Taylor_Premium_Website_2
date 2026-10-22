@@ -146,9 +146,9 @@ export default function ServiceDetailPage({ slug, number, title, accent, descrip
                   Get a competitive quote for your project. Rene is available to discuss requirements directly.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <a href="tel:+64210274447" className="flex items-center gap-2.5 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
+                  <a href="tel:+642102742447" className="flex items-center gap-2.5 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
                     <Phone className="w-3.5 h-3.5" />
-                    +64 21 027 4447
+                    021 0274 2447
                   </a>
                   <a href="mailto:Rene@RobbTaylor.co.nz" className="flex items-center gap-2.5 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
                     <Mail className="w-3.5 h-3.5" />

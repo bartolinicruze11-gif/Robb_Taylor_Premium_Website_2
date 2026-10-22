@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import TotikaAccreditation from '@/components/TotikaAccreditation';
 
 import { motion } from 'framer-motion';
@@ -9,6 +10,12 @@ const differentiators = [
   { icon: Clock, title: 'Programme Focused', accent: '#1a9fd4' },
   { icon: Award, title: 'Environmentally Focused', accent: '#1ab8c8' },
   { icon: MapPin, title: 'Local Expertise', accent: '#2281f5' },
+];
+
+const industryAccreditations = [
+  { name: 'SiteWise Gold 2025/26', src: '/images/sitewise-gold-2025-26.png', width: 716, height: 232 },
+  { name: 'Civil Contractors New Zealand', src: '/images/civil-contractors-nz.png', width: 1881, height: 820 },
+  { name: 'NZDAA Member', src: '/images/nzdaa-member.png', width: 198, height: 199 },
 ];
 
 export default function TrustSection() {
@@ -92,6 +99,23 @@ export default function TrustSection() {
 
       <div className="mx-auto max-w-7xl px-6 pb-16 lg:px-10">
         <h3 className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Safety Accredited &amp; Industry Members</h3>
+        <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Safety accreditations and industry memberships">
+          {industryAccreditations.map((accreditation) => (
+            <li key={accreditation.name} className="rounded-xl border border-white/10 bg-white/[0.025] p-4 text-center">
+              <div className="flex h-36 items-center justify-center rounded-lg bg-white p-4">
+                <Image
+                  src={accreditation.src}
+                  alt={accreditation.name}
+                  width={accreditation.width}
+                  height={accreditation.height}
+                  sizes="(max-width: 640px) calc(100vw - 112px), (max-width: 1280px) 30vw, 340px"
+                  className="max-h-28 w-auto max-w-full object-contain"
+                />
+              </div>
+              <p className="mt-4 text-sm font-semibold text-white/80">{accreditation.name}</p>
+            </li>
+          ))}
+        </ul>
         <TotikaAccreditation businessName="Robb & Taylor Contracting" />
       </div>
 

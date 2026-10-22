@@ -24,7 +24,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-white font-bold text-lg mb-3">1. Who We Are</h2>
               <p>Robb &amp; Taylor Contracting Ltd (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is a civil contracting company based in the Wellington Region, New Zealand. This privacy policy explains how we collect and use personal information when you visit our website or engage with us.</p>
-              <p className="mt-2">Contact: Rene — <a href="mailto:Rene@RobbTaylor.co.nz" className="text-blue-400 hover:text-blue-300">Rene@RobbTaylor.co.nz</a> | <a href="tel:+64210274447" className="text-blue-400 hover:text-blue-300">+64 21 027 4447</a></p>
+              <p className="mt-2">Contact: Rene — <a href="mailto:Rene@RobbTaylor.co.nz" className="text-blue-400 hover:text-blue-300">Rene@RobbTaylor.co.nz</a> | <a href="tel:+642102742447" className="text-blue-400 hover:text-blue-300">021 0274 2447</a></p>
             </section>
 
             <section>

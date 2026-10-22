@@ -174,11 +174,11 @@ export default function ThankYouContent() {
           transition={{ delay: 0.55, duration: 0.5 }}
         >
           <a
-            href="tel:+64210274447"
+            href="tel:+642102742447"
             className="flex items-center gap-2.5 border border-white/[0.1] bg-[#06111f] hover:border-blue-500/40 hover:bg-blue-500/[0.05] text-white text-sm font-semibold px-5 py-3 transition-all duration-200"
           >
             <Phone className="w-4 h-4 text-blue-400" />
-            +64 21 027 4447
+            021 0274 2447
           </a>
           <a
             href="mailto:Rene@RobbTaylor.co.nz"

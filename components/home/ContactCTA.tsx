@@ -112,13 +112,13 @@ export default function ContactCTA() {
 
             {/* Contact items */}
             <div className="flex flex-col gap-6 mb-12">
-              <a href="tel:+64210274447" className="flex items-center gap-4 group">
+              <a href="tel:+642102742447" className="flex items-center gap-4 group">
                 <div className="w-10 h-10 border border-white/[0.07] flex items-center justify-center group-hover:border-blue-500/40 group-hover:bg-blue-500/8 transition-all flex-shrink-0">
                   <Phone className="w-4 h-4 text-blue-400" />
                 </div>
                 <div>
                   <p className="text-[#3d5668] text-[10px] font-semibold uppercase tracking-[0.15em] mb-0.5">Phone</p>
-                  <p className="text-white font-semibold group-hover:text-blue-400 transition-colors">+64 21 027 4447</p>
+                  <p className="text-white font-semibold group-hover:text-blue-400 transition-colors">021 0274 2447</p>
                 </div>
               </a>
               <a href="mailto:Rene@RobbTaylor.co.nz" className="flex items-center gap-4 group">

@@ -99,7 +99,7 @@ const localBusinessSchema = {
   description:
     'Civil contractors in the Wellington Region providing civil construction, earthworks, pavements, retaining and piling, and trenching.',
   url: BASE_URL,
-  telephone: '+64-21-027-4447',
+  telephone: '+64-21-0274-2447',
   email: 'Rene@RobbTaylor.co.nz',
   address: {
     '@type': 'PostalAddress',
@@ -172,7 +172,7 @@ const organizationSchema = {
   },
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+64-21-027-4447',
+    telephone: '+64-21-0274-2447',
     contactType: 'customer service',
     areaServed: 'NZ',
     availableLanguage: 'English',

@@ -1,3 +1,4 @@
+import { TOTIKA_CERTIFICATION } from '@/lib/totika';
 import './globals.css';
 import type { Metadata } from 'next';
 
@@ -18,25 +19,22 @@ export const metadata: Metadata = {
     default: 'Civil Contractors Wellington | Robb & Taylor Contracting',
     template: '%s | Robb & Taylor Contracting',
   },
-  description:
-    "Wellington's #1 civil contractors. Robb & Taylor Contracting specialise in civil construction, water infrastructure, drainage, earthworks, trenching and pipe installation across Wellington, Lower Hutt, Upper Hutt, Porirua and Kapiti. Free quotes — response within 1 business day.",
+  description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   keywords: [
+    "Totika prequalified civil contractors Wellington",
+    "Tōtika civil contractors",
+    "Totika Robb & Taylor Contracting",
+    "Tōtika health and safety prequalification",
+
     'civil contractors Wellington',
     'civil construction Wellington',
     'civil construction company Wellington NZ',
-    'water infrastructure Wellington',
-    'water main installation Wellington',
-    'drainage contractors Wellington',
-    'stormwater drainage Wellington',
     'earthworks contractors Wellington',
     'bulk earthworks Wellington',
-    'pipe installation Wellington',
-    'pipeline installation Wellington',
     'trenching contractors Wellington',
     'site preparation Wellington',
     'civil engineering contractors Wellington NZ',
     'infrastructure contractors Wellington',
-    'Wellington Water approved contractors',
     'civil works Lower Hutt',
     'civil works Upper Hutt',
     'civil works Porirua',
@@ -57,8 +55,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: 'Robb & Taylor Contracting',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description:
-      "Wellington's specialist civil contractors. Water infrastructure, drainage, earthworks, trenching and civil construction — NZS 4404 certified, council-approved, serving the Wellington Region.",
+    description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
     images: [
       {
         url: '/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg',
@@ -71,7 +68,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description: "Wellington's specialist civil contractors — water infrastructure, drainage, earthworks and more. NZS 4404 certified, council-approved.",
+    description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
     images: ['/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg'],
   },
   robots: {
@@ -91,13 +88,14 @@ export const metadata: Metadata = {
 };
 
 const localBusinessSchema = {
+  hasCertification: TOTIKA_CERTIFICATION,
   '@context': 'https://schema.org',
   '@type': ['LocalBusiness', 'GeneralContractor'],
   '@id': `${BASE_URL}/#business`,
   name: 'Robb & Taylor Contracting Ltd',
   legalName: 'Robb & Taylor Contracting Ltd',
   description:
-    'Specialist civil contractors in the Wellington Region providing civil construction, water infrastructure, drainage, earthworks, trenching and pipe installation. NZS 4404 certified and Wellington Water approved.',
+    "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   url: BASE_URL,
   telephone: '+64-21-0274-2447',
   email: 'Rene@RobbTaylor.co.nz',
@@ -159,6 +157,7 @@ const localBusinessSchema = {
 };
 
 const organizationSchema = {
+  hasCertification: TOTIKA_CERTIFICATION,
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${BASE_URL}/#organization`,
@@ -186,7 +185,7 @@ const webSiteSchema = {
   '@id': `${BASE_URL}/#website`,
   url: BASE_URL,
   name: 'Robb & Taylor Contracting — Civil Contractors Wellington',
-  description: 'Wellington Region civil contractors specialising in water infrastructure, drainage, earthworks and civil construction.',
+  description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   publisher: { '@id': `${BASE_URL}/#organization` },
 };
 

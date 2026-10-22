@@ -142,7 +142,7 @@ export const policies = {
               "180 days, or until you clear site data"
             ],
             [
-              "Administrator session storage",
+              "Administrator access state",
               "Keeps authorised admin access/session state on that device. Not required for a public enquiry.",
               "Tab/session or until signed out; provider settings may differ"
             ],

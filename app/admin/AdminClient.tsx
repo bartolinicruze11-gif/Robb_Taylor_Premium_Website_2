@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useAdminToken } from '@/components/admin/AdminAccess';
 import { Quote, QuoteStatus } from '@/lib/supabase';
 import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
 import {
@@ -11,19 +12,21 @@ import {
   Command, Zap, Layers, Filter, MoveHorizontal as MoreHorizontal, Copy, ExternalLink
 } from 'lucide-react';
 
-const ADMIN_QUOTES_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin-quotes`;
+const ADMIN_QUOTES_URL = '/api/admin/quotes';
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-async function callAdminApi(password: string, body: Record<string, unknown>) {
+async function callAdminApi(token: string, body: Record<string, unknown>) {
   const res = await fetch(ADMIN_QUOTES_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ANON_KEY}`,
+      'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ password, ...body }),
+    body: JSON.stringify(body),
   });
-  return res.json();
+  const result = await res.json();
+  if (!res.ok || result.error) throw new Error(result.error || 'Request failed');
+  return result;
 }
 
 const STATUS_CONFIG: Record<QuoteStatus, { label: string; text: string; bg: string; ring: string; dot: string; icon: typeof Clock }> = {
@@ -93,6 +96,7 @@ function QuoteWorkspace({
 }: {
   quote: Quote; password: string; onUpdate: () => void; onBack: () => void; onDelete: (id: string) => void;
 }) {
+  const [requestError, setRequestError] = useState('');
   const [notes, setNotes] = useState(quote.admin_notes);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -104,21 +108,31 @@ function QuoteWorkspace({
 
   async function saveNotes() {
     setSaving(true); setSaved(false);
-    await callAdminApi(password, { action: 'update_notes', id: quote.id, admin_notes: notes });
-    setSaving(false); setSaved(true);
+    try {
+      setRequestError('');
+      await callAdminApi(password, { action: 'update_notes', id: quote.id, admin_notes: notes });
+      setSaved(true);
+    } catch { setRequestError('Notes were not saved. Please try again.'); }
+    finally { setSaving(false); }
     setTimeout(() => setSaved(false), 2000);
   }
 
   async function updateStatus(s: QuoteStatus) {
-    setStatus(s);
-    await callAdminApi(password, { action: 'update_status', id: quote.id, status: s });
-    onUpdate();
+    try {
+      setRequestError('');
+      await callAdminApi(password, { action: 'update_status', id: quote.id, status: s });
+      setStatus(s); onUpdate();
+    } catch { setRequestError('Status was not saved. Please try again.'); }
   }
 
   async function handleDelete() {
     setDeleting(true);
-    await callAdminApi(password, { action: 'delete', id: quote.id });
-    onDelete(quote.id);
+    try {
+      setRequestError('');
+      await callAdminApi(password, { action: 'delete', id: quote.id });
+      onDelete(quote.id);
+    } catch { setRequestError('Enquiry was not deleted. Please try again.'); }
+    finally { setDeleting(false); }
   }
 
   return (
@@ -129,6 +143,7 @@ function QuoteWorkspace({
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
+      {requestError && <p role="alert" className="text-red-300 mb-3">{requestError}</p>}
       <button
         onClick={onBack}
         className="lg:hidden inline-flex items-center gap-1.5 text-sky-300/60 hover:text-sky-100 text-xs font-semibold uppercase tracking-wider transition-colors mb-4"
@@ -372,10 +387,10 @@ function QuoteRow({
 }
 
 export default function AdminClient() {
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState('');
-  const [enteredPassword, setEnteredPassword] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
+  const enteredPassword = useAdminToken();
+  const authed = !!enteredPassword;
+
+  const [loadError, setLoadError] = useState('');
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -386,11 +401,14 @@ export default function AdminClient() {
 
   const fetchQuotes = useCallback(async (pass: string) => {
     setLoading(true);
-    const result = await callAdminApi(pass, { action: 'list' });
-    const list: Quote[] = result.data ?? [];
-    setQuotes(list);
-    setSelected(prev => prev ? list.find(q => q.id === prev.id) ?? null : null);
-    setLoading(false);
+    try {
+      setLoadError('');
+      const result = await callAdminApi(pass, { action: 'list' });
+      const list: Quote[] = result.data ?? [];
+      setQuotes(list);
+      setSelected(prev => prev ? list.find(q => q.id === prev.id) ?? null : null);
+    } catch { setLoadError('Unable to load enquiries. Please refresh or sign in again.'); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -411,24 +429,6 @@ export default function AdminClient() {
     return () => window.removeEventListener('keydown', onKey);
   }, [authed]);
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const result = await callAdminApi(password, { action: 'list' });
-    setLoading(false);
-    if (!result || result.error || !Array.isArray(result.data)) {
-      setAuthError(
-        result?.error && result.error !== 'Unauthorized'
-          ? result.error
-          : 'Incorrect password. Please try again.'
-      );
-      return;
-    }
-    setEnteredPassword(password);
-    setQuotes(result.data);
-    setAuthed(true);
-    setAuthError(null);
-  }
 
   const filtered = useMemo(() => quotes.filter(q => {
     const matchStatus = filterStatus === 'all' || q.status === filterStatus;
@@ -457,95 +457,6 @@ export default function AdminClient() {
     { label: 'Closed Deals',    value: counts.closed, icon: CheckCircle, tint: 'from-emerald-500/[0.12] via-emerald-500/[0.03] to-transparent', ring: 'ring-emerald-400/25', accent: 'text-emerald-300' },
   ];
 
-  if (!authed) {
-    return (
-      <div className="min-h-screen relative bg-[#02101f] flex items-center justify-center px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(56,189,248,0.18)_0%,transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_85%,rgba(34,211,238,0.12)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)] [background-size:56px_56px]" />
-
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-sky-500/10 blur-[120px] pointer-events-none"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative w-full max-w-[440px]"
-        >
-          <div className="relative border border-sky-400/20 bg-[#0a1f38]/70 backdrop-blur-2xl overflow-hidden rounded-2xl shadow-[0_30px_100px_rgba(0,0,0,0.6)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
-            <div className="absolute inset-x-0 top-[2px] h-[1px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
-
-            <div className="p-10">
-              <div className="flex items-center justify-center gap-3 mb-8">
-                <div className="relative w-12 h-12">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 opacity-40 blur-md" />
-                  <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400/30 to-cyan-500/15 border border-sky-400/50 flex items-center justify-center">
-                    <ShieldCheck className="w-5 h-5 text-sky-100" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-white font-black text-sm tracking-wide">ROBB &amp; TAYLOR</p>
-                  <p className="text-sky-300/60 text-[10px] uppercase tracking-[0.3em]">Operations Console</p>
-                </div>
-              </div>
-
-              <div className="text-center mb-8">
-                <h1 className="text-white font-black text-2xl mb-2 tracking-tight">Secure Access</h1>
-                <p className="text-sky-300/60 text-sm">Authenticate to enter the command center.</p>
-              </div>
-
-              <form onSubmit={handleLogin} className="flex flex-col gap-3">
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sky-300/50 group-focus-within:text-sky-300 transition-colors" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={e => { setPassword(e.target.value); setAuthError(null); }}
-                    placeholder="Enter password"
-                    autoFocus
-                    className="w-full bg-black/40 border border-white/10 focus:border-sky-400/60 text-white placeholder-sky-300/30 text-sm pl-11 pr-4 py-3.5 outline-none transition-all rounded-lg focus:shadow-[0_0_0_4px_rgba(56,189,248,0.12)]"
-                  />
-                </div>
-                <AnimatePresence>
-                  {authError && (
-                    <motion.p
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="text-red-400 text-xs flex items-center gap-1.5"
-                    >
-                      <AlertCircle className="w-3 h-3 flex-shrink-0" />{authError}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-                <button
-                  type="submit"
-                  disabled={loading || !password}
-                  className="relative overflow-hidden w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm py-3.5 uppercase tracking-[0.2em] transition-all mt-1 rounded-lg shadow-[0_10px_30px_rgba(14,165,233,0.35)] group"
-                >
-                  <span className="relative z-10">{loading ? 'Verifying…' : 'Sign In'}</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                </button>
-              </form>
-
-              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2 text-sky-300/40 text-[10px] uppercase tracking-widest">
-                <ShieldCheck className="w-3 h-3" />
-                Encrypted &middot; Audited &middot; Restricted
-              </div>
-            </div>
-          </div>
-          <p className="text-sky-300/25 text-[10px] text-center mt-5 uppercase tracking-widest">
-            Robb &amp; Taylor Contracting Ltd
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#02101f] text-white relative">
@@ -595,13 +506,7 @@ export default function AdminClient() {
               <span className="hidden sm:block">Sync</span>
             </button>
             <div className="h-5 w-px bg-white/10" />
-            <button
-              onClick={() => { setAuthed(false); setPassword(''); setEnteredPassword(''); setSelected(null); }}
-              className="flex items-center gap-1.5 text-sky-300/70 hover:text-white text-xs font-semibold uppercase tracking-wider transition-colors px-2 py-1"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:block">Sign Out</span>
-            </button>
+
           </div>
         </div>
       </header>
@@ -730,6 +635,7 @@ export default function AdminClient() {
           </aside>
 
           <main className="min-w-0">
+            {loadError && <p role="alert" className="text-red-300 mb-4">{loadError}</p>}
             {selected ? (
               <>
                 <button
@@ -829,3 +735,4 @@ export default function AdminClient() {
     </div>
   );
 }
+

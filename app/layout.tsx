@@ -29,12 +29,19 @@ export const metadata: Metadata = {
     'civil contractors Wellington',
     'civil construction Wellington',
     'civil construction company Wellington NZ',
+    'retaining walls Wellington',
+    'civil site preparation Wellington',
+    'retaining contractors Wellington',
+    'pavement construction Wellington',
     'earthworks contractors Wellington',
     'bulk earthworks Wellington',
+    'piling contractors Wellington',
+    'earthmoving contractors Wellington',
     'trenching contractors Wellington',
     'site preparation Wellington',
     'civil engineering contractors Wellington NZ',
     'infrastructure contractors Wellington',
+    'civil trenching contractors Wellington',
     'civil works Lower Hutt',
     'civil works Upper Hutt',
     'civil works Porirua',
@@ -61,7 +68,7 @@ export const metadata: Metadata = {
         url: '/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg',
         width: 1200,
         height: 630,
-        alt: 'Robb & Taylor Contracting — Civil Contractors Wellington — HDPE pipe installation',
+        alt: 'Robb & Taylor Contracting — Civil Contractors Wellington — civil construction site work',
       },
     ],
   },
@@ -127,7 +134,7 @@ const localBusinessSchema = {
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Civil Construction Wellington', description: 'Full-scope civil construction including roading, kerb and channel, retaining structures and utilities in Wellington.', url: `${BASE_URL}/services/civil-construction` } },
 
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Earthworks Wellington', description: 'Bulk earthworks, cut and fill, compaction and subgrade preparation for Wellington subdivisions.', url: `${BASE_URL}/services/earthworks` } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Trenching Wellington', description: 'Precision trenching for utility and pipeline installation across Wellington Region.', url: `${BASE_URL}/services/trenching` } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Trenching Wellington', description: 'Precision trenching and site preparation for service corridors across Wellington Region.', url: `${BASE_URL}/services/trenching` } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Retaining & Piling Works Wellington', description: 'Retaining walls and piling for residential, commercial and infrastructure projects.', url: `${BASE_URL}/services/retaining-piling` } },
     ],
   },
@@ -148,12 +155,12 @@ const localBusinessSchema = {
     'Civil Construction',
 
     'Earthworks',
-    'Pipeline Installation',
-    'NZS 4404',
-    'Wellington Water',
+    'Retaining & Piling',
+    'Earthworks',
+    'Pavement Preparation',
     'ConstructSafe',
   ],
-  award: ['ConstructSafe Accredited', 'NZS 4404 Certified', 'Site Safe Gold Member'],
+  award: ['ConstructSafe Accredited', 'Site Safe Gold Member'],
 };
 
 const organizationSchema = {
@@ -257,3 +264,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

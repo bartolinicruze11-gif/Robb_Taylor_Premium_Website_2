@@ -127,12 +127,12 @@ export default function CapabilitySection() {
               transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.12 }}
             >
               <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', overflow: 'hidden' }}>
-                <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={projectImages.pipes} alt="Robb &amp; Taylor — large-diameter concrete pipe installation Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
+                <Image fill sizes="(max-width: 768px) 100vw, 50vw" src={projectImages.pipes} alt="Robb &amp; Taylor — civil construction site works Wellington" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', filter: 'brightness(1.0) saturate(0.96)' }} />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute inset-0 bg-gradient-to-t from-[#020c18]/50 via-transparent to-transparent" />
                   <div className="absolute bottom-3.5 left-4 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-blue-400" />
-                    <span className="text-[#6a8598] text-[10px] tracking-widest uppercase font-semibold">Large-Diameter Concrete Pipe Installation</span>
+                    <span className="text-[#6a8598] text-[10px] tracking-widest uppercase font-semibold">Civil Construction Site Works</span>
                   </div>
                 </div>
               </div>
@@ -146,3 +146,4 @@ export default function CapabilitySection() {
     </section>
   );
 }
+

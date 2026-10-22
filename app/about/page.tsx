@@ -181,7 +181,7 @@ export default function AboutPage() {
                   Rene Robb founded Robb &amp; Taylor Contracting on a deceptively simple premise — that the civil contracting industry deserved a firm built around genuine technical competence and an unconditional commitment to delivery. Holding a <span className="text-[#a0b8cc] font-semibold">Bachelor of Engineering</span>, he brings a level of analytical rigour to infrastructure work that most contractors simply cannot match.
                 </p>
                 <p>
-                  Over more than 15 years operating across the Wellington Region, Rene has personally directed hundreds of projects — from complex urban water main replacements and pressurised pipeline networks to large-scale bulk earthworks and stormwater infrastructure. He remains hands-on at every stage: tender pricing, methodology planning, plant selection, and site-level quality assurance. Nothing leaves his oversight unchecked.
+                  Over more than 15 years operating across the Wellington Region, Rene has personally directed hundreds of projects — from site preparation and complex excavations to large-scale bulk earthworks, retaining structures and pavement works. He remains hands-on at every stage: tender pricing, methodology planning, plant selection, and site-level quality assurance. Nothing leaves his oversight unchecked.
                 </p>
                 <p>
                   His operating philosophy is rooted in transparency and precision. Clients receive honest pricing, realistic programmes, and a team that holds to the agreed standard from first mobilisation through to final reinstatement. That consistency has built enduring working relationships with councils and a select group of the region&apos;s most respected developers and prime contractors.
@@ -192,7 +192,7 @@ export default function AboutPage() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                {['B.Eng (Civil)', '15+ Years Experience', 'Wellington Region', 'ConstructSafe Accredited', 'Wellington Water Approved'].map(tag => (
+                {['B.Eng (Civil)', '15+ Years Experience', 'Wellington Region', 'ConstructSafe Accredited'].map(tag => (
                   <span key={tag} className="text-xs text-[#6a8598] border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 font-medium">{tag}</span>
                 ))}
               </div>
@@ -253,8 +253,8 @@ export default function AboutPage() {
         <div className="grid grid-cols-2 lg:grid-cols-3">
           {[
             { src: '/images/Screenshot_2026-06-18_073355.png',           alt: 'Pipe laying and trenching site works',       label: 'Trenching' },
-            { src: '/images/Screenshot_2026-05-26_104638.png',           alt: 'Concrete pipe installation works',           label: 'Pipe Installation' },
-            { src: "/images/Screenshot_2026-05-27_091929 copy.png",      alt: 'Indoor piling with excavator',               label: 'Retaining & Piling' },
+            { src: '/images/Screenshot_2026-05-26_104638.png',           alt: 'Civil construction site works',           label: 'Civil Construction' },
+            { src: "/images/Screenshot_2026-05-27_091929.png",      alt: 'Indoor piling with excavator',               label: 'Retaining & Piling' },
           ].map((img, i) => (
             <motion.div
               key={img.label}
@@ -326,7 +326,7 @@ export default function AboutPage() {
                 Wellington Region
               </h2>
               <p className="text-[#6a8598] text-base leading-relaxed mb-7">
-                Permanently based in Wellington with deep knowledge of the region&apos;s infrastructure networks and strong working relationships with Wellington Water, Wellington City Council, and the wider region.
+                Permanently based in Wellington with deep knowledge of the region&apos;s infrastructure networks and experience working across Wellington City and the wider region.
               </p>
               <div className="flex flex-wrap gap-2 mb-8">
                 {['Wellington City', 'Lower Hutt', 'Upper Hutt', 'Porirua', 'Kapiti Coast', 'Wairarapa'].map(area => (
@@ -392,3 +392,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

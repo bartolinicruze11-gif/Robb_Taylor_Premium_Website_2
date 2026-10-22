@@ -205,7 +205,7 @@ export default function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.0 }}
         >
-          Three waters, earthworks & pavements, retaining & piling, and civil construction — delivered on programme and to specification by a team built on precision, reliability, and real-world results.
+          Earthworks & pavements, retaining & piling, trenching, and civil construction — delivered on programme and to specification by a team built on precision, reliability, and real-world results.
         </motion.p>
 
         {/* CTA row */}

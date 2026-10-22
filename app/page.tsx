@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 import HeroSection from '@/components/home/HeroSection';
 import ServicesPreview from '@/components/home/ServicesPreview';
 import InfrastructureSection from '@/components/home/InfrastructureSection';
@@ -27,15 +25,15 @@ const faqSchema = {
       name: 'What civil contracting services do Robb & Taylor offer in Wellington?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Robb & Taylor Contracting provides civil construction, water infrastructure installation, stormwater drainage, bulk earthworks, trenching, pipe installation (HDPE, PVC, ductile iron), retaining & piling, and site preparation services across the Wellington Region including Lower Hutt, Upper Hutt, Porirua and Kapiti Coast.',
+        text: 'Robb & Taylor Contracting provides civil construction, bulk earthworks, trenching, retaining and piling, pavement preparation, and site preparation across the Wellington Region including Lower Hutt, Upper Hutt, Porirua and Kapiti Coast.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Are Robb & Taylor approved Wellington Water contractors?',
+      name: 'What types of retaining and piling work does Robb & Taylor undertake?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Robb & Taylor Contracting are Wellington Water approved contractors, NZS 4404 certified, and ConstructSafe accredited. We carry $10M public liability insurance and hold Site Safe Gold membership.',
+        text: 'Contact Robb & Taylor about retaining structures and piling requirements for residential, commercial and civil construction projects. The team can discuss scope and site conditions before quoting.',
       },
     },
     {
@@ -56,10 +54,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Is Robb & Taylor NZS 4404 certified?',
+      name: 'How can I discuss a civil construction project with Robb & Taylor?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Robb & Taylor Contracting holds NZS 4404 certification (New Zealand standard for land development and subdivision infrastructure) and is recognised by Wellington Water and Wellington City Council as a qualified civil contractor.',
+        text: 'Send a project outline using the online enquiry form, or contact the team by phone or email to discuss scope, site access and project timing.',
       },
     },
   ],
@@ -80,3 +78,4 @@ export default function HomePage() {
     </>
   );
 }
+

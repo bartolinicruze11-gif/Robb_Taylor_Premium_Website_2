@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  keywords: [
+    "Totika prequalified civil contractors Wellington",
+    "Tōtika civil contractors",
+    "Totika Robb & Taylor Contracting",
+    "Tōtika health and safety prequalification",
+  ],
   title: 'About Robb & Taylor Contracting | Wellington Civil Contractors',
-  description: "Meet the team behind Wellington's trusted civil contractors. Founded by Rene Robb B.Eng — 15+ years working across earthworks, retaining structures and civil construction across the Wellington Region.",
+  description: "Robb & Taylor Contracting is Tōtika prequalified. Learn about our health and safety prequalification, team and civil contracting services across Wellington and Kāpiti.",
   alternates: { canonical: 'https://www.robbtaylor.co.nz/about' },
   openGraph: {
     title: 'About Robb & Taylor Contracting | Wellington Civil Contractors',
-    description: "Robb & Taylor Contracting — founded by engineer Rene Robb. Delivering civil construction, earthworks, retaining and piling, and pavements across Wellington, Lower Hutt, Upper Hutt, Porirua and Kapiti.",
+    description: "Robb & Taylor Contracting is Tōtika prequalified. Learn about our health and safety prequalification, team and civil contracting services across Wellington and Kāpiti.",
     url: 'https://www.robbtaylor.co.nz/about',
     type: 'website',
   },

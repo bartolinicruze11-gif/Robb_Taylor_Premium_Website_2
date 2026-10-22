@@ -8,12 +8,11 @@ import ContactCTA from '@/components/home/ContactCTA';
 
 export const metadata: Metadata = {
   title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-  description:
-    "Robb & Taylor Contracting provide civil construction, earthworks, retaining and piling, trenching, and pavement works across Wellington, Lower Hutt, Upper Hutt and Porirua. Request a quote.",
+  description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   alternates: { canonical: 'https://www.robbtaylor.co.nz' },
   openGraph: {
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description: "Wellington civil contractors for earthworks, retaining and piling, trenching, pavements and civil construction. Call for a quote.",
+    description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   },
 };
 
@@ -79,3 +78,4 @@ export default function HomePage() {
     </>
   );
 }
+

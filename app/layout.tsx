@@ -1,3 +1,4 @@
+import { TOTIKA_CERTIFICATION } from '@/lib/totika';
 import './globals.css';
 import type { Metadata } from 'next';
 
@@ -18,9 +19,13 @@ export const metadata: Metadata = {
     default: 'Civil Contractors Wellington | Robb & Taylor Contracting',
     template: '%s | Robb & Taylor Contracting',
   },
-  description:
-    "Robb & Taylor Contracting specialise in civil construction, earthworks, pavements, retaining and piling, and trenching across Wellington, Lower Hutt, Upper Hutt, Porirua and Kapiti.",
+  description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   keywords: [
+    "Totika prequalified civil contractors Wellington",
+    "Tōtika civil contractors",
+    "Totika Robb & Taylor Contracting",
+    "Tōtika health and safety prequalification",
+
     'civil contractors Wellington',
     'civil construction Wellington',
     'civil construction company Wellington NZ',
@@ -57,8 +62,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: 'Robb & Taylor Contracting',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description:
-      "Wellington's specialist civil contractors. Earthworks, retaining and piling, pavements, trenching and civil construction across the Wellington region, serving the Wellington Region.",
+    description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
     images: [
       {
         url: '/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg',
@@ -71,7 +75,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Civil Contractors Wellington | Robb & Taylor Contracting',
-    description: "Wellington's specialist civil contractors — earthworks, retaining and piling, pavements and trenching.",
+    description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
     images: ['/images/WhatsApp_Image_2026-05-04_at_12.13.08_PM_(4).jpeg'],
   },
   robots: {
@@ -91,13 +95,14 @@ export const metadata: Metadata = {
 };
 
 const localBusinessSchema = {
+  hasCertification: TOTIKA_CERTIFICATION,
   '@context': 'https://schema.org',
   '@type': ['LocalBusiness', 'GeneralContractor'],
   '@id': `${BASE_URL}/#business`,
   name: 'Robb & Taylor Contracting Ltd',
   legalName: 'Robb & Taylor Contracting Ltd',
   description:
-    'Civil contractors in the Wellington Region providing civil construction, earthworks, pavements, retaining and piling, and trenching.',
+    "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   url: BASE_URL,
   telephone: '+64-21-0274-2447',
   email: 'Rene@RobbTaylor.co.nz',
@@ -159,6 +164,7 @@ const localBusinessSchema = {
 };
 
 const organizationSchema = {
+  hasCertification: TOTIKA_CERTIFICATION,
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${BASE_URL}/#organization`,
@@ -186,7 +192,7 @@ const webSiteSchema = {
   '@id': `${BASE_URL}/#website`,
   url: BASE_URL,
   name: 'Robb & Taylor Contracting — Civil Contractors Wellington',
-  description: 'Wellington Region civil contractors specialising in earthworks, pavements, retaining and piling, trenching and civil construction.',
+  description: "Tōtika-prequalified civil contractors in Wellington and Kāpiti. Civil construction, earthworks, retaining, piling and trenching. Request a quote.",
   publisher: { '@id': `${BASE_URL}/#organization` },
 };
 
@@ -258,3 +264,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
